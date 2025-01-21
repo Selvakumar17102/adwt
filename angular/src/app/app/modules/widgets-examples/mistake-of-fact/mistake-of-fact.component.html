@@ -1,0 +1,171 @@
+<div class="card border-primary ">
+  <div class="card-header text-center py-4 bg-light">
+    <h5 class="mt-4 mb-0 fw-bold text-dark">Mistake of Fact (MF)</h5>
+    <!-- <button class="btn btn-outline-primary">View FIR</button> -->
+  </div>
+  <div class="card-body  ">
+    <form [formGroup]="formGroup" (ngSubmit)="onSubmit($event)">
+
+      <!-- Row 1 -->
+      <div class="row">
+        <!-- Name of the Investigating Officer -->
+        <div class="form-group col-md-6 mt-4">
+          <label for="officerName">1. Name of the new Investigating Officer <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            id="officerName"
+            class="form-control"
+            formControlName="officerName"
+            placeholder="Enter Officer Name"
+          />
+          <div *ngIf="formGroup.get('officerName')?.invalid && formGroup.get('officerName')?.touched" class="text-danger">
+            Name is required.
+          </div>
+        </div>
+
+        <!-- Designation of the Investigating Officer -->
+        <div class="form-group col-md-6 mt-4">
+          <label for="officerDesignation">2. Designation of the new Investigating Officer</label>
+          <select id="officerDesignation" class="form-select" formControlName="officerDesignation">
+            <option value="" disabled selected>Select Designation</option>
+            <option *ngFor="let designation of designations" [value]="designation">{{ designation }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="row">
+        <!-- Phone number of the Investigating Officer -->
+        <div class="form-group col-md-6 mt-4">
+          <label for="officerPhone">3. Phone number of the new Investigating Officer <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            id="officerPhone"
+            class="form-control"
+            formControlName="officerPhone"
+            placeholder="Enter Phone Number"
+          />
+          <div *ngIf="formGroup.get('officerPhone')?.invalid && formGroup.get('officerPhone')?.touched" class="text-danger">
+            Valid phone number is required.
+          </div>
+        </div>
+
+        <!-- Chargesheet Filed with the Court -->
+        <div class="form-group col-md-6 mt-4">
+          <label>4. Chargesheet filed with the Court? <span class="text-danger">*</span></label>
+          <select
+            id="chargesheetcheckbox"
+            class="form-select"
+            formControlName="chargesheetcheckbox"
+
+          >
+            <option value="" disabled selected>Select One</option>
+            <option *ngFor="let type of chargesheetOptions" [value]="type">{{ type }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="row">
+        <!-- Date of filing Chargesheet -->
+        <div class="form-group col-md-6 mt-4">
+          <label for="chargesheetDate">5. Date of filing Chargesheet <span class="text-danger">*</span></label>
+          <input type="date" id="chargesheetDate" class="form-control" formControlName="chargesheetDate" />
+        </div>
+
+        <!-- Type of Charge Sheet -->
+        <div class="form-group col-md-6 mt-4">
+          <label for="chargesheetType">6. Type of Charge Sheet <span class="text-danger">*</span></label>
+          <select id="chargesheetType" class="form-select" formControlName="chargesheetType">
+            <option value="" disabled selected>Select Type</option>
+            <option *ngFor="let type of chargeSheetTypes" [value]="type">{{ type }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 4 -->
+      <div class="row">
+        <!-- Court District -->
+        <div class="form-group col-md-6 mt-4" *ngIf="showCourtDistricts">
+          <label for="courtDistrict">7. Court District <span class="text-danger">*</span></label>
+          <select id="courtDistrict" class="form-select" formControlName="courtDistrict">
+            <option value="" disabled selected>Select District</option>
+            <option *ngFor="let district of districts" [value]="district">{{ district }}</option>
+          </select>
+        </div>
+        <!-- Court Name -->
+        <div class="form-group col-md-6 mt-4" *ngIf="showCourtDistrict">
+          <label for="courtName">8. Court Name <span class="text-danger">*</span></label>
+          <select id="courtName" class="form-select" formControlName="courtName">
+            <option value="" disabled selected>Select Court Name</option>
+            <option *ngFor="let court of courts" [value]="court">{{ court }}</option>
+          </select>
+        </div>
+ <!-- Case Number Report -->
+ <div class="form-group col-md-6 mt-4" *ngIf="showCaseNumber">
+  <label for="caseNumber">9. Case Number Report (CNR)/ Special SC number <span class="text-danger">*</span></label>
+  <input
+    type="text"
+    id="caseNumber"
+    class="form-control"
+    formControlName="caseNumber"
+    placeholder="Enter Case Number"
+  />
+
+       </div>
+        <!-- Referred Charge Sheet (RCS) Filing Number -->
+        <div class="form-group col-md-6 mt-4" *ngIf="showReferredFields">
+          <label for="rcsFilingNumber">10. Referred Charge Sheet (RCS) Filing Number <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            id="rcsFilingNumber"
+            class="form-control"
+            formControlName="rcsFilingNumber"
+            placeholder="Enter RCS Filing Number"
+          />
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-primary mt-3 mb-4" >
+        <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+        Submit
+      </button>
+
+        <!-- <button type="submit" class="btn btn-primary mt-3 mb-4">Submit</button> -->
+    </form>
+  </div>
+</div>
+<!-- <div class="card border-primary">
+  <div class="card-header bg-light d-flex justify-content-between align-items-center">
+    <h5>Officers List</h5>
+  </div>
+  <div class="card-body">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Officer Name</th>
+          <th>Designation</th>
+          <th>Phone</th>
+          <th>Chargesheet Filed</th>
+          <th>Chargesheet Date</th>
+          <th>Court District</th>
+          <th>Case Number</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let officer of officers; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ officer.officer_name }}</td>
+          <td>{{ officer.officer_designation }}</td>
+          <td>{{ officer.officer_phone }}</td>
+          <td>{{ officer.chargesheet_checkbox }}</td>
+          <td>{{ officer.chargesheet_date }}</td>
+          <td>{{ officer.court_district }}</td>
+          <td>{{ officer.case_number }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div> -->

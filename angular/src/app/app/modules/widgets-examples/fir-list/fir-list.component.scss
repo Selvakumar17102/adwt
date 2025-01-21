@@ -1,0 +1,32 @@
+.card {
+  position: relative;
+  overflow: hidden; /* Ensures content stays within the card */
+}
+
+.card-body {
+  position: relative;
+  overflow: hidden; /* Prevent content overflow */
+}
+
+.table-responsive {
+  max-height: 70vh; /* Adjust based on your design */
+  overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.table {
+  width: 100%; /* Ensures the table takes up available space */
+  min-width: 1200px; /* Set a minimum width to prevent column collapse */
+  table-layout: auto; /* Allow columns to adjust */
+  word-wrap: break-word; /* Prevent text overflow */
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa; /* Keep header background */
+  z-index: 1;
+}
+

@@ -1,0 +1,1541 @@
+<div class="card">
+  <div class="card-header border-0 pt-6">
+    <div class="card-title">
+      <div class="d-flex align-items-center position-relative my-1">
+        <i class="fas fa-search fs-3 position-absolute ms-5"></i>
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          (input)="applyFilters()"
+          class="form-control form-control-solid w-250px ps-12"
+          placeholder="Search FIR"
+        />
+      </div>
+    </div>
+    <div class="card-toolbar d-flex align-items-center gap-3">
+      <mat-form-field appearance="outline" class="w-250px">
+        <mat-label>Selected Columns</mat-label>
+        <mat-select>
+          <div cdkDropList (cdkDropListDropped)="dropColumn($event)">
+            <mat-option *ngFor="let column of displayedColumns" cdkDrag>
+              <div class="d-flex align-items-center gap-2">
+                <mat-checkbox
+                  [checked]="column.visible"
+                  (change)="toggleColumnVisibility(column)"
+                >
+                  {{ column.label }}
+                </mat-checkbox>
+                <i class="fas fa-bars drag-handle" cdkDragHandle></i>
+              </div>
+            </mat-option>
+          </div>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="card-body pt-0">
+    <!-- Filters -->
+    <div class="d-flex gap-3 mb-3">
+      <!-- District Filter -->
+      <select class="form-select" [(ngModel)]="selectedDistrict" (change)="applyFilters()">
+        <option value="" selected>All Districts</option>
+        <option *ngFor="let district of districts" [value]="district">{{ district }}</option>
+      </select>
+
+      <!-- Status of Case Filter -->
+      <select class="form-select" [(ngModel)]="selectedStatusOfCase" (change)="applyFilters()">
+        <option value="" selected>All Statuses of the Case</option>
+        <option [value]="5">UI Stage</option>
+        <option [value]="6">PT Stage</option>
+        <option [value]="7">Trial Stage</option>
+      </select>
+
+      <!-- Status of Relief Filter -->
+      <select class="form-select" [(ngModel)]="selectedStatusOfRelief" (change)="applyFilters()">
+        <option value="" selected>All Statuses of Relief</option>
+        <option [value]="11">FIR Stage</option>
+        <option [value]="12">ChargeSheet Stage</option>
+        <option [value]="13">Trial Stage</option>
+      </select>
+    </div>
+
+
+    <!-- Show message if FIR list is empty -->
+    <div *ngIf="filteredList.length === 0" class="alert alert-warning">
+      No FIR data available.
+    </div>
+
+    <!-- Responsive Table -->
+    <div class="table-responsive">
+      <table *ngIf="filteredList.length > 0" class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th *ngFor="let column of displayedColumns" [hidden]="!column.visible">
+              {{ column.label }}
+              <i
+                *ngIf="column.sortable"
+                class="fas"
+                [ngClass]="getSortIcon(column.field)"
+                (click)="sortTable(column.field)"
+              ></i>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fir of paginatedFirList(); let i = index">
+            <td *ngFor="let column of displayedColumns" [hidden]="!column.visible">
+              <ng-container [ngSwitch]="column.field">
+              <span *ngSwitchCase="'sl_no'">{{ (page - 1) * itemsPerPage + i + 1 }}</span>
+              <span *ngSwitchCase="'fir_id'">{{ fir.fir_id }}</span>
+              <span *ngSwitchCase="'police_city'">{{ fir.police_city }}</span>
+              <span *ngSwitchCase="'police_station'">{{ fir.police_station }}</span>
+
+              <span *ngSwitchCase="'police_zone'">{{ fir.police_zone }}</span>
+              <span *ngSwitchCase="'police_range'">{{ fir.police_range }}</span>
+              <span *ngSwitchCase="'revenue_district'">{{ fir.revenue_district }}</span>
+
+              <span *ngSwitchCase="'name_of_io'">{{ fir.officer_name }}</span>
+              <span *ngSwitchCase="'designation_of_io'">{{ fir.officer_designation }}</span>
+              <span *ngSwitchCase="'phone_no_of_io'">{{ fir.officer_phone }}</span>
+
+              <span *ngSwitchCase="'fir_no'">{{ fir.fir_number }}-{{ fir.fir_number_suffix }}</span>
+              <span *ngSwitchCase="'date_of_occ'">{{ fir.date_of_occurrence }}</span>
+              <span *ngSwitchCase="'time_of_occ'">{{ fir.time_of_occurrence }}</span>
+              <span *ngSwitchCase="'place_of_occ'">{{ fir.place_of_occurrence }}</span>
+              <span *ngSwitchCase="'date_of_case_reg'">{{ fir.date_of_registration }}</span>
+              <span *ngSwitchCase="'time_of_case_reg'">{{ fir.time_of_registration }}</span>
+
+              <span *ngSwitchCase="'name_comp'">{{ fir.name_of_complainant }}</span>
+              <span *ngSwitchCase="'mobile_comp'">{{ fir.mobile_number_of_complainant }}</span>
+              <span *ngSwitchCase="'victim_same_as_comp'">{{ fir.is_victim_same_as_complainant }}</span>
+              <span *ngSwitchCase="'num_of_victims'">{{ fir.number_of_victim }}</span>
+              <span *ngSwitchCase="'is_deceased'">{{ fir.is_deceased }}</span>
+              <span *ngSwitchCase="'deceased_person'">{{ fir.deceased_person_names }}</span>
+
+              <span *ngSwitchCase="'num_of_accussed'">{{ fir.number_of_accused }}</span>
+
+              <span *ngSwitchCase="'total_amt_1st'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'proceeding_file_no'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'proceeding_file_date'">{{ fir.number_of_accused }}</span>
+
+              <span *ngSwitchCase="'charge_sheet_court'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'court_division'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'court_range'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'case_type'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'special_sc_no'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'rcs_file_no'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'rcs_file_date'">{{ fir.number_of_accused }}</span>
+
+              <span *ngSwitchCase="'total_amt_2nd'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'cs_proceeding_file_no'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'cs_proceeding_file_date'">{{ fir.number_of_accused }}</span>
+
+              <span *ngSwitchCase="'special_court'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'court_present'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'ts_special_sc_no'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'public_prosecutor_name'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'public_prosecutor_phno'">{{ fir.number_of_accused }}</span>
+
+              <span *ngSwitchCase="'total_amt_3rd'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'ts_proceeding_file_no'">{{ fir.number_of_accused }}</span>
+              <span *ngSwitchCase="'ts_proceeding_file_date'">{{ fir.number_of_accused }}</span>
+
+
+              <span *ngSwitchCase="'created_by'">{{ fir.created_by || 'Super User' }}</span>
+              <span *ngSwitchCase="'created_at'">{{ fir.created_at | date: 'dd-MM-yyyy' }}</span>
+              <span *ngSwitchCase="'status'">
+                <span class="badge" [ngClass]="getStatusBadgeClass(fir.status)">
+                  {{ getStatusWithNature(fir.status, fir.nature_of_judgement) }}
+                </span>
+              </span>
+              <span *ngSwitchCase="'actions'">
+                <div ngbDropdown class="d-inline-block">
+                  <button
+                    ngbDropdownToggle
+                    class="btn btn-circle btn-icon btn-bg-light btn-active-color-primary"
+                  >
+                    <i class="fas fa-ellipsis-h fs-3"></i>
+                  </button>
+                  <div ngbDropdownMenu>
+                    <!-- For status 0 to 7 -->
+                    <ng-container *ngIf="fir.status >= 0 && fir.status <= 8">
+                      <button ngbDropdownItem (click)="openModal()">View</button>
+                      <button ngbDropdownItem (click)="openEditPage(fir.fir_id)">Edit</button>
+                      <button ngbDropdownItem (click)="navigateToAlteredCase(fir.fir_id)">Altered Case</button>
+                      <button ngbDropdownItem (click)="deleteFIR(i, fir.fir_id)">Delete</button>
+                    </ng-container>
+
+                    <!-- For status 12 -->
+                    <ng-container *ngIf="fir.status === 9">
+                      <button ngbDropdownItem (click)="navigateToMistakeOfFact(fir.fir_id)">Re-Open Case</button>
+                      <button ngbDropdownItem (click)="deleteFIR(i, fir.fir_id)">Delete</button>
+                    </ng-container>
+                  </div>
+                </div>
+              </span>
+
+
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+    <!-- Pagination Controls -->
+    <nav
+    *ngIf="filteredFirList().length > itemsPerPage"
+    class="d-flex justify-content-end mt-3"
+  >
+    <ul class="pagination">
+      <li class="page-item" [class.disabled]="page === 1">
+        <button class="page-link" (click)="previousPage()">Previous</button>
+      </li>
+      <li class="page-item" *ngFor="let pageNum of totalPagesArray()">
+        <button
+          class="page-link"
+          (click)="goToPage(pageNum)"
+          [class.active]="page === pageNum"
+        >
+          {{ pageNum }}
+        </button>
+      </li>
+      <li class="page-item" [class.disabled]="!hasNextPage()">
+        <button class="page-link" (click)="nextPage()">Next</button>
+      </li>
+    </ul>
+  </nav>
+  </div>
+
+</div>
+
+
+<ng-template #firDetailsModal let-modal>
+  <div class="modal-header bg-primary text-white d-flex justify-content-between align-items-center py-3 rounded-top">
+    <h5 class="modal-title fw-bold mb-0 text-uppercase">
+      FIR Details
+    </h5>
+    <button
+      type="button"
+      class="btn-close btn-close-white"
+      aria-label="Close"
+      (click)="modal.dismiss()">
+    </button>
+  </div>
+
+
+  <div class="modal-body">
+    <!-- Step Navigation Tabs -->
+    <div class="step-navigation mb-4">
+      <div class="d-flex justify-content-around">
+        <button
+          class="btn fw-bold px-5 py-3"
+          [ngClass]="{ 'btn-primary text-white': currentStep === 0, 'btn-light text-dark': currentStep !== 0 }"
+          (click)="navigateToStep(0)"
+          style="border-radius: 10px; width: 200px;"
+        >
+          FIR Stage
+        </button>
+        <button
+          class="btn fw-bold px-5 py-3"
+          [ngClass]="{ 'btn-primary text-white': currentStep === 5, 'btn-light text-dark': currentStep !== 5 }"
+          (click)="navigateToStep(5)"
+          style="border-radius: 10px; width: 200px;"
+        >
+          Chargesheet Stage
+        </button>
+        <button
+          class="btn fw-bold px-5 py-3"
+          [ngClass]="{ 'btn-primary text-white': currentStep === 6, 'btn-light text-dark': currentStep !== 6 }"
+          (click)="navigateToStep(6)"
+          style="border-radius: 10px; width: 200px;"
+        >
+          Trial Stage
+        </button>
+      </div>
+    </div>
+
+
+
+
+
+    <!-- Progress Bar -->
+    <div class="progress mb-4">
+      <div
+        class="progress-bar"
+        role="progressbar"
+        [style.width]="progressPercentage + '%'"
+        [attr.aria-valuenow]="progressPercentage"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        Step {{ currentStep + 1 }} of 7
+      </div>
+    </div>
+
+    <!-- Location Details Section -->
+    <div *ngIf="currentStep === 0">
+      <div class="card border-primary mb-4">
+        <div class="card-body">
+          <div class="location-details mb-4">
+            <h5>Location Details</h5>
+            <div class="row">
+              <div class="col-md-6 col-lg-3 mb-3">
+                <label for="policeCity" class="form-label">1. Police City / District</label>
+                <input
+                  id="policeCity"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Police City / District"
+                />
+              </div>
+              <div class="col-md-6 col-lg-3 mb-3">
+                <label for="policeZone" class="form-label">2. Police Zone</label>
+                <input
+                  id="policeZone"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Police Zone"
+                />
+              </div>
+              <div class="col-md-6 col-lg-3 mb-3">
+                <label for="policeRange" class="form-label">3. Police Range</label>
+                <input
+                  id="policeRange"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Police Range"
+                />
+              </div>
+              <div class="col-md-6 col-lg-3 mb-3">
+                <label for="revenueDistrict" class="form-label">4. Revenue District</label>
+                <input
+                  id="revenueDistrict"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Revenue District"
+                />
+              </div>
+              <div class="col-md-6 col-lg-3 mb-3">
+                <label for="stationName" class="form-label">5. Police Station Name</label>
+                <input
+                  id="stationName"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Police Station Name"
+                />
+              </div>
+            </div>
+
+            <!-- Investigating Officer Details Section -->
+            <h5>Investigating Officer Details</h5>
+            <div class="row">
+              <div class="col-md-6 col-lg-4 mb-3">
+                <label for="officerName" class="form-label">6. Name of the Investigating Officer (IO)</label>
+                <input
+                  id="officerName"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Officer Name"
+                />
+              </div>
+              <div class="col-md-6 col-lg-4 mb-3">
+                <label for="officerDesignation" class="form-label">7. Designation of the Investigating Officer</label>
+                <input
+                  id="officerDesignation"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Designation"
+                />
+              </div>
+              <div class="col-md-6 col-lg-4 mb-3">
+                <label for="officerPhone" class="form-label">8. Phone Number of the Investigating Officer</label>
+                <input
+                  id="officerPhone"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Phone Number"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Step 2: Offence Information Section -->
+    <div *ngIf="currentStep === 1">
+      <div class="card border-primary mb-4">
+        <div class="card-body">
+          <div class="offence-information mb-4">
+            <h5>Step 2: Offence Information</h5>
+            <div class="row mb-3">
+              <!-- FIR Number -->
+              <div class="col-md-6 mb-3">
+                <label for="firNumber" class="form-label">9. FIR Number</label>
+                <input
+                  type="text"
+                  id="firNumber"
+                  class="form-control"
+                  placeholder="Enter FIR Number"
+                />
+              </div>
+
+              <!-- Date of Occurrence -->
+              <div class="col-md-6 mb-3">
+                <label for="dateOfOccurrence" class="form-label">10. Date of Occurrence</label>
+                <input
+                  type="text"
+                  id="dateOfOccurrence"
+                  class="form-control"
+                  placeholder="Enter Date"
+                />
+              </div>
+
+              <!-- Time of Occurrence -->
+              <div class="col-md-6 mb-3">
+                <label for="timeOfOccurrence" class="form-label">11. Time of Occurrence</label>
+                <input
+                  type="text"
+                  id="timeOfOccurrence"
+                  class="form-control"
+                  placeholder="Enter Time"
+                />
+              </div>
+
+              <!-- Place of Occurrence -->
+              <div class="col-md-6 mb-3">
+                <label for="placeOfOccurrence" class="form-label">12. Place of Occurrence</label>
+                <input
+                  type="text"
+                  id="placeOfOccurrence"
+                  class="form-control"
+                  placeholder="Enter Place"
+                />
+              </div>
+
+              <!-- Date of Case Registration -->
+              <div class="col-md-6 mb-3">
+                <label for="dateOfRegistration" class="form-label">13. Date of Case Registration</label>
+                <input
+                  type="text"
+                  id="dateOfRegistration"
+                  class="form-control"
+                  placeholder="Enter Date"
+                />
+              </div>
+
+              <!-- Time of Case Registration -->
+              <div class="col-md-6 mb-3">
+                <label for="timeOfRegistration" class="form-label">14. Time of Case Registration</label>
+                <input
+                  type="text"
+                  id="timeOfRegistration"
+                  class="form-control"
+                  placeholder="Enter Time"
+                />
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- step3 victim info -->
+    <div *ngIf="currentStep === 2">
+      <div class="card border-primary mb-4">
+        <div class="card-body">
+      <div class="victim-information">
+          <h3 class="mb-4">Step 3: Victim Information</h3>
+
+          <!-- Complainant Details Section -->
+          <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+              <label for="nameOfComplainant" class="form-label">15. Name of Complainant *</label>
+              <input
+                type="text"
+                id="nameOfComplainant"
+                class="form-control"
+                placeholder="Enter Name of Complainant"
+              />
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label for="mobileNumberOfComplainant" class="form-label">16. Mobile Number of Complainant *</label>
+              <input
+                type="text"
+                id="mobileNumberOfComplainant"
+                class="form-control"
+                placeholder="Enter Mobile Number"
+              />
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label for="isVictimSameAsComplainant" class="form-label">17. Is the victim same as complainant? *</label>
+              <input
+                type="text"
+                id="isVictimSameAsComplainant"
+                class="form-control"
+                placeholder="Enter Yes or No"
+              />
+            </div>
+
+            <div class="col-md-2 mb-3">
+              <label for="numberOfVictims" class="form-label">18. Number of Victims *</label>
+              <input
+                type="text"
+                id="numberOfVictims"
+                class="form-control"
+                placeholder="Enter Number of Victims"
+              />
+            </div>
+          </div>
+
+          <!-- Victim Details Section -->
+          <div class="victim-details mb-4">
+            <h5>Victim Details</h5>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="victimAge" class="form-label">19. Age of the Victim *</label>
+                <input
+                  type="text"
+                  id="victimAge"
+                  class="form-control"
+                  placeholder="Enter Victim's Age"
+                />
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="victimName" class="form-label">20. Name of the Victim *</label>
+                <input
+                  type="text"
+                  id="victimName"
+                  class="form-control"
+                  placeholder="Enter Victim's Name"
+                />
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="victimGender" class="form-label">21. Gender of the Victim *</label>
+                <input
+                  type="text"
+                  id="victimGender"
+                  class="form-control"
+                  placeholder="Enter Gender"
+                />
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="victimMobile" class="form-label">22. Mobile Number of the Victim</label>
+                <input
+                  type="text"
+                  id="victimMobile"
+                  class="form-control"
+                  placeholder="Enter Mobile Number"
+                />
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="victimAddress" class="form-label">23. Address of the Victim</label>
+                <input
+                  type="text"
+                  id="victimAddress"
+                  class="form-control"
+                  placeholder="Enter Address"
+                />
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="victimPincode" class="form-label">24. Pincode</label>
+                <input
+                  type="text"
+                  id="victimPincode"
+                  class="form-control"
+                  placeholder="Enter Pincode"
+                />
+              </div>
+
+              <div class="col-md-3 mb-3">
+                <label for="victimCommunity" class="form-label">25. Community of the Victim *</label>
+                <input
+                  type="text"
+                  id="victimCommunity"
+                  class="form-control"
+                  placeholder="Enter Community"
+                />
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label for="victimCaste" class="form-label">26. Caste of the Victim *</label>
+                <input
+                  type="text"
+                  id="victimCaste"
+                  class="form-control"
+                  placeholder="Enter Caste"
+                />
+              </div>
+
+              <div class="col-md-5 mb-3">
+                <label for="victimGuardian" class="form-label">27. Name of Victim’s Father/ Mother/ Spouse/ Guardian *</label>
+                <input
+                  type="text"
+                  id="victimGuardian"
+                  class="form-control"
+                  placeholder="Enter Guardian's Name"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="isNativeDistrictSame" class="form-label">28. Is the victim’s native district the same as the scene of crime occurrence? *</label>
+                <input
+                  type="text"
+                  id="isNativeDistrictSame"
+                  class="form-control"
+                  placeholder="Enter Yes or No"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="victimOffence" class="form-label">29. Nature of offence committed against the victim *</label>
+                <textarea
+                  id="victimOffence"
+                  class="form-control"
+                  placeholder="Describe the Offence"
+                ></textarea>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="sectionsIPC" class="form-label">30. Section Invoked Under IPC/POCSO/etc. *</label>
+                <textarea
+                  id="sectionsIPC"
+                  class="form-control"
+                  placeholder="Enter Sections, separated by commas"
+                ></textarea>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="isDeceased" class="form-label">33. Has the victim deceased due to the offence? *</label>
+                <input
+                  type="text"
+                  id="isDeceased"
+                  class="form-control"
+                  placeholder="Enter Yes or No"
+                />
+              </div>
+
+              <div class="col-md-6 mb-3">
+                          <label for="deceasedPersonNames" class="form-label">34. Name(s) of the deceased person *</label>
+                <input
+                  type="text"
+                  id="isDeceased"
+                  class="form-control"
+                  placeholder="Enter Yes or No"
+                />
+              </div>
+            </div>
+          </div>
+      </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- step4 Accused Info -->
+    <div *ngIf="currentStep === 3">
+      <div class="card border-primary mb-4">
+        <div class="card-body">
+          <div class="accused-information">
+            <h3 class="mb-4">Step 4: Accused Information</h3>
+
+            <!-- Number of Accused Section -->
+            <div class="col-md-3 mb-3">
+              <label for="numberOfAccused" class="form-label">35. Number of Accused *</label>
+              <input
+                type="text"
+                id="numberOfAccused"
+                class="form-control"
+                placeholder="Enter Number of Accused"
+              />
+            </div>
+
+            <!-- Accused Details Section -->
+            <div class="accused-details mb-4">
+              <h5>Accused Details</h5>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="accusedAge" class="form-label">36. Age of the Accused *</label>
+                  <input
+                    type="text"
+                    id="accusedAge"
+                    class="form-control"
+                    placeholder="Enter Accused Age"
+                  />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="accusedName" class="form-label">37. Name of the Accused *</label>
+                  <input
+                    type="text"
+                    id="accusedName"
+                    class="form-control"
+                    placeholder="Enter Accused Name"
+                  />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="accusedGender" class="form-label">38. Gender of the Accused *</label>
+                  <input
+                    type="text"
+                    id="accusedGender"
+                    class="form-control"
+                    placeholder="Enter Gender"
+                  />
+                </div>
+
+                <!-- Address and Pincode -->
+                <div class="col-md-6 mb-3">
+                  <label for="accusedAddress" class="form-label">39. Address of the Accused</label>
+                  <input
+                    type="text"
+                    id="accusedAddress"
+                    class="form-control"
+                    placeholder="Enter Address"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="accusedPincode" class="form-label">40. Pincode</label>
+                  <input
+                    type="text"
+                    id="accusedPincode"
+                    class="form-control"
+                    placeholder="Enter Pincode"
+                  />
+                </div>
+
+                <!-- Community and Caste -->
+                <div class="col-md-3 mb-3">
+                  <label for="accusedCommunity" class="form-label">41. Community of the Accused *</label>
+                  <input
+                    type="text"
+                    id="accusedCommunity"
+                    class="form-control"
+                    placeholder="Enter Community"
+                  />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                  <label for="accusedCaste" class="form-label">42. Caste of the Accused *</label>
+                  <input
+                    type="text"
+                    id="accusedCaste"
+                    class="form-control"
+                    placeholder="Enter Caste"
+                  />
+                </div>
+
+                <!-- Father/Spouse Name -->
+                <div class="col-md-5 mb-3">
+                  <label for="accusedGuardian" class="form-label">
+                    43. Name of Accused person’s Father/ Mother/ Spouse/ Guardian *
+                  </label>
+                  <input
+                    type="text"
+                    id="accusedGuardian"
+                    class="form-control"
+                    placeholder="Enter Guardian's Name"
+                  />
+                </div>
+
+                <!-- Previous Incidents Against Same Victim -->
+                <div class="col-md-6 mb-3">
+                  <label for="previousIncident" class="form-label">
+                    44. Whether the accused person been involved in any previous incident/s against the same victim/ victim’s family? *
+                  </label>
+                  <input
+                    type="text"
+                    id="previousIncident"
+                    class="form-control"
+                    placeholder="Enter Yes or No"
+                  />
+                </div>
+
+                <!-- Previous FIR Number -->
+                <div class="col-md-6 mb-3">
+                  <label for="previousFIRNumber" class="form-label">45. FIR number of previous cases *</label>
+                  <input
+                    type="text"
+                    id="previousFIRNumber"
+                    class="form-control"
+                    placeholder="Enter Previous FIR Number"
+                  />
+                </div>
+
+                <!-- SC/ST Offences -->
+                <div class="col-md-6 mb-3">
+                  <label for="scstOffence" class="form-label">
+                    46. Whether the accused person has committed any offence against members of the SC/ ST community? *
+                  </label>
+                  <input
+                    type="text"
+                    id="scstOffence"
+                    class="form-control"
+                    placeholder="Enter Yes or No"
+                  />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="scstFIRNumber" class="form-label">47. FIR number of previous cases *</label>
+                  <input
+                    type="text"
+                    id="scstFIRNumber"
+                    class="form-control"
+                    placeholder="Enter SC/ST FIR Number"
+                  />
+                </div>
+
+                <!-- Antecedents of the Accused -->
+                <div class="col-md-6 mb-3">
+                  <label for="antecedents" class="form-label">
+                    48. Antecedents of the Accused (History sheeter / Goondas / Bind over, etc.) *
+                  </label>
+                  <input
+                    type="text"
+                    id="antecedents"
+                    class="form-control"
+                    placeholder="Enter Antecedents"
+                  />
+                </div>
+
+                <!-- L&O Issues -->
+                <div class="col-md-6 mb-3">
+                  <label for="landOIssues" class="form-label">
+                    49. L&O Issues (Pickets, Bandoust, etc.) *
+                  </label>
+                  <input
+                    type="text"
+                    id="landOIssues"
+                    class="form-control"
+                    placeholder="Enter L&O Issues"
+                  />
+                </div>
+
+                <!-- Gist of the Current Case -->
+                <div class="col-md-12 mb-3">
+                  <label for="gistOfCurrentCase" class="form-label">50. Gist of the Current Case *</label>
+                  <textarea
+                    id="gistOfCurrentCase"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Enter Gist of the Current Case"
+                  ></textarea>
+                </div>
+
+                <!-- FIR Copy Upload -->
+                <div class="col-md-6 mb-3">
+                  <label for="uploadFIRCopy" class="form-label">51. Upload FIR Copy *</label>
+                  <input
+                    type="text"
+                    id="uploadFIRCopy"
+                    class="form-control"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+     </div>
+
+    <!-- step5 FIR Stage (MRF) Details-->
+    <div *ngIf="currentStep === 4">
+      <div class="card border-primary mb-4">
+        <div class="card-body">
+          <div class="relief-details">
+            <h3 class="mb-4">Step 5: Victim Relief</h3>
+
+            <!-- Community Certificate Verification -->
+            <div class="mb-4 col-md-4">
+              <label class="form-label">
+                52. Has the Community Certificate of the Victim(s) been Verified and Obtained? *
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="communityCertificate"
+                placeholder="Enter Yes or No"
+              />
+            </div>
+
+            <!-- Victim Name -->
+            <div class="mb-4 col-lg-4">
+              <label class="form-label">53. Name of the Victim *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="victimName"
+                placeholder="Enter Victim Name"
+              />
+            </div>
+
+            <!-- Relief Amount Fields -->
+            <div class="row mb-3">
+              <div class="col-8">
+                <label class="form-label">54. Eligible relief amount for the victim as per SC/ST Act *</label>
+              </div>
+              <div class="col-4">
+                <input
+                  type="text"
+                  class="form-control text-end"
+                  id="reliefAmountScst"
+                  placeholder="Enter Relief Amount"
+                />
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-8">
+                <label class="form-label">55. Eligible relief amount for the victim (ex-gratia) by Govt. of Tamil Nadu *</label>
+              </div>
+              <div class="col-4">
+                <input
+                  type="text"
+                  class="form-control text-end"
+                  id="reliefAmountExGratia"
+                  placeholder="Enter Relief Amount"
+                />
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-8">
+                <label class="form-label">56. Eligible amount for the 1st Stage of Relief *</label>
+              </div>
+              <div class="col-4">
+                <input
+                  type="text"
+                  class="form-control text-end"
+                  id="reliefAmountFirstStage"
+                  placeholder="Enter Relief Amount"
+                />
+              </div>
+            </div>
+
+            <!-- Additional Relief Options -->
+            <div class="mb-4">
+              <label class="form-label d-block mb-2">57. Eligible additional relief for the legal heir of the person died *</label>
+              <textarea
+                class="form-control"
+                id="additionalRelief"
+                placeholder="Enter Additional Relief Details"
+              ></textarea>
+            </div>
+
+            <!-- Total Compensation Amount -->
+            <div class="row mb-4">
+              <div class="col-8">
+                <label class="form-label">58. Total Amount for 1st Stage of Compensation (Total across all victims) *</label>
+              </div>
+              <div class="col-4">
+                <input
+                  type="text"
+                  class="form-control text-end"
+                  id="totalCompensation"
+                  placeholder="Enter Total Amount"
+                />
+              </div>
+            </div>
+
+            <!-- Single Fields -->
+            <div class="row mb-4">
+              <div class="mb-4 col-6">
+                <label class="form-label">59. Proceedings File No. *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="proceedingsFileNo"
+                  placeholder="Enter File No."
+                />
+              </div>
+
+              <div class="mb-4 col-6">
+                <label class="form-label">60. Proceedings Date *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="proceedingsDate"
+                />
+              </div>
+            </div>
+
+            <!-- Upload Commissionerate / S.P. Office Proceedings -->
+            <div class="mb-4">
+              <label class="form-label">61. Upload Commissionerate / S.P. Office Proceedings *</label>
+              <textarea
+                class="form-control"
+                id="proceedingsFile"
+                rows="2"
+                placeholder="Enter details for Commissionerate / S.P. Office Proceedings"
+              ></textarea>
+            </div>
+
+            <!-- Attachment Fields -->
+            <div class="mb-4">
+              <label class="form-label">62. Upload key Attachments *</label>
+              <textarea
+                class="form-control"
+                id="attachments"
+                rows="2"
+                placeholder="Enter details or references for key attachments"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="currentStep === 5">
+      <div class="charge-sheet">
+        <!-- Charge Sheet Filed Details -->
+        <div class="card border-primary mb-4">
+          <div class="card-body">
+            <h5>Charge Sheet Filed Details</h5>
+            <div class="row mb-3">
+              <!-- Charge Sheet Filed -->
+              <div class="col-md-4">
+                <label for="chargeSheetFiled" class="form-label">63. Charge Sheet filed with the Court?</label>
+                <input type="text" id="chargeSheetFiled" class="form-control" placeholder="Yes/No" />
+              </div>
+              <!-- Court Division -->
+              <div class="col-md-4">
+                <label for="courtDistrict" class="form-label">64. Court Division</label>
+                <input type="text" id="courtDistrict" class="form-control" placeholder="Enter Court Division" />
+              </div>
+              <!-- Court Range -->
+              <div class="col-md-4">
+                <label for="courtName" class="form-label">65. Court Range</label>
+                <input type="text" id="courtName" class="form-control" placeholder="Enter Court Range" />
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <!-- Case Type -->
+              <div class="col-md-4">
+                <label for="caseType" class="form-label">66. Select Case Type</label>
+                <input type="text" id="caseType" class="form-control" placeholder="Enter Case Type" />
+              </div>
+              <!-- Case Number -->
+              <div class="col-md-6">
+                <label for="caseNumber" class="form-label">67. Case Number Report (CNR) / Special SC Number</label>
+                <input type="text" id="caseNumber" class="form-control" placeholder="Enter Case Number" />
+              </div>
+              <!-- RCS File Number -->
+              <div class="col-md-6">
+                <label for="rcsFileNumber" class="form-label">68. RCS File Number</label>
+                <input type="text" id="rcsFileNumber" class="form-control" placeholder="Enter RCS File Number" />
+              </div>
+              <!-- RCS Filing Date -->
+              <div class="col-md-6">
+                <label for="rcsFilingDate" class="form-label">69. RCS Filing Date</label>
+                <input type="text" id="rcsFilingDate" class="form-control" />
+              </div>
+              <!-- Upload MF Copy -->
+              <div class="col-md-6">
+                <label for="mfCopy" class="form-label">70. Upload MF Copy</label>
+                <input type="text" id="mfCopy" class="form-control" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Victim Relief Details -->
+        <div class="card border-primary mb-4">
+          <div class="card-body">
+            <h5>Victim Relief Details</h5>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="reliefAmountScst" class="form-label">71. Name of the Victim *</label>
+                <input type="text" id="victimName" class="form-control" placeholder="Enter Victim Name" />
+              </div>
+              <div class="col-md-6">
+                <label for="reliefAmountScst" class="form-label">72. Relief Amount (SC/ST Act)</label>
+                <input type="text" id="reliefAmountScst" class="form-control" placeholder="Enter Relief Amount" />
+              </div>
+              <div class="col-md-6">
+                <label for="reliefAmountExGratia" class="form-label">73. Relief Amount (Ex-Gratia)</label>
+                <input type="text" id="reliefAmountExGratia" class="form-control" placeholder="Enter Relief Amount" />
+              </div>
+              <div class="col-md-6">
+                <label for="totalCompensation" class="form-label">74. Total eligible amount for the victim for the second stage of relief *</label>
+                <input type="text" id="totalCompensation" class="form-control" readonly />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compensation and Attachments -->
+        <div class="card border-primary mb-4">
+          <div class="card-body">
+            <h5>Compensation Details</h5>
+            <div class="row mb-3">
+              <div class="col-md-8">
+                <label for="totalCompensation" class="form-label">75. Total amount for second stage of compensation (total of relief across all victims) *</label>
+                <input type="text" id="totalCompensation" class="form-control" readonly />
+              </div>
+              <!-- Proceedings File No -->
+              <div class="col-md-6">
+                <label for="proceedingsFileNo" class="form-label">76. Proceedings File No.</label>
+                <input type="text" id="proceedingsFileNo" class="form-control" placeholder="Enter File No." />
+              </div>
+              <!-- Proceedings Date -->
+              <div class="col-md-6">
+                <label for="proceedingsDate" class="form-label">77. Proceedings Date</label>
+                <input type="text" id="proceedingsDate" class="form-control" />
+              </div>
+            </div>
+
+            <!-- Upload Commissionerate/SP Office Proceedings -->
+            <div class="mb-3">
+              <label for="uploadProceedings" class="form-label">78. Upload Commissionerate/SP Office Proceedings</label>
+              <input type="text" id="uploadProceedings" class="form-control" />
+            </div>
+
+            <!-- Other Attachments -->
+            <div class="mb-3">
+              <label for="attachments" class="form-label">79. Upload Other Attachments</label>
+              <textarea id="attachments" class="form-control" rows="2" placeholder="Enter details or descriptions for other attachments"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="currentStep === 6">
+      <div class="Trail-stage">
+        <!-- Case Trial and Court Details -->
+        <div class="card border-primary mb-4">
+          <div class="card-body">
+            <h4 class="mb-4">Case Trial and Court Details</h4>
+            <div class="row">
+              <!-- Item 74 -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">80. Name of the Designated / Special court *</label>
+                <input type="text" class="form-control" placeholder="Enter Name" />
+              </div>
+              <!-- Item 75 -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">81. District in which court is present *</label>
+                <input type="text" class="form-control" placeholder="Enter District" />
+              </div>
+              <!-- Item 76 -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">82. Case Number Report (CNR) / Special SC number *</label>
+                <input type="text" class="form-control" placeholder="Enter Case Number" />
+              </div>
+              <!-- Item 77 -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">83. Special Public Prosecutor's Name *</label>
+                <input type="text" class="form-control" placeholder="Enter Name" />
+              </div>
+              <!-- Item 78 -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">84. Special Public Prosecutor's Phone Number *</label>
+                <input type="text" class="form-control" placeholder="Enter Phone Number" maxlength="10" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card border-primary mb-4">
+          <div class="card-body">
+            <h4 class="mb-4">Select Hearing Date</h4>
+            <div class="row">
+              <!-- First Hearing Date -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">85. First Hearing Date *</label>
+                <input type="text" class="form-control" placeholder="Select Hearing Date" />
+              </div>
+
+              <!-- Has a Judgement been awarded in the case? -->
+              <div class="col-md-6">
+                <label class="form-label">86. Has a Judgement been awarded in the case? *</label>
+                <input type="text" class="form-control" placeholder="Enter Yes or No" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card border-primary mb-4">
+            <div class="card-body">
+              <div>
+                <div class="row mb-3">
+                  <!-- Next Hearing Date -->
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">87. Next Hearing Date *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Select Next Hearing Date"
+                    />
+                  </div>
+
+                  <!-- Reason for Next Hearing -->
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">88. Reason for Next Hearing *</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Enter Reason"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <label class="form-label">89. Has a Judgement been awarded in the case? *</label>
+                </div>
+                <div class="col-md-4">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter Yes or No"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Judgement Details -->
+        <div>
+          <!-- Nature of Judgement and Upload Judgement Copy Section -->
+          <div class="card border-primary mb-4">
+            <div class="card-body">
+            <h5 >Judgement Details</h5>
+            <div class="row align-items-center">
+              <!-- Nature of Judgement -->
+              <div class="col-md-6">
+                <label class="form-label">90. Nature of Judgement *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Nature of Judgement"
+                />
+              </div>
+
+              <!-- Upload Judgement Copy -->
+              <div class="col-md-6">
+                <label class="form-label">91. Upload Judgement Copy *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Judgement Copy Details"
+                />
+              </div>
+            </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card border-primary mb-4">
+              <div class="card-body">
+                <h5 >Victim Relief Details</h5>
+
+                <!-- Victim Name -->
+                <div class="mb-4 col-lg-4">
+                  <label class="form-label">92. Name of the Victim *</label>
+                  <input type="text" class="form-control mb-3" placeholder="Enter Name of the Victim" />
+                </div>
+
+                <!-- Relief Amount Fields -->
+                <div class="row mb-3">
+                  <div class="col-8">
+                    <label class="form-label">93. Eligible third stage relief amount for the victim as per the SC and ST Prevention of Atrocities Act *</label>
+                  </div>
+                  <div class="col-4 text-end">
+                    <input type="text" class="form-control text-end" placeholder="Enter Amount" />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-8">
+                    <label class="form-label">94. Eligible third stage relief amount for the victim (ex-gratia) by the Govt. of Tamil Nadu *</label>
+                  </div>
+                  <div class="col-4 text-end">
+                    <input type="text" class="form-control text-end" placeholder="Enter Amount" />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-8">
+                    <label class="form-label">95. Total Eligible amount for the victim for the Third stage of relief *</label>
+                  </div>
+                  <div class="col-4 text-end">
+                    <input type="text" class="form-control text-end" placeholder="Enter Total Amount" readonly />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Items 89 to 93 with blue border -->
+            <div class="card border-primary mb-4">
+              <div class="card-body">
+                <!-- Total Compensation Amount -->
+                <div class="row mb-4">
+                  <div class="col-8">
+                    <label class="form-label">96. Total amount for third stage of compensation (total of relief across all victims) *</label>
+                  </div>
+                  <div class="col-4">
+                    <input type="text" class="form-control text-end" placeholder="Enter Total Amount" readonly />
+                  </div>
+                </div>
+
+                <!-- Commissionerate / SP Office Proceedings -->
+                <div class="row mb-4">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">97. Proceedings File No. *</label>
+                    <input type="text" class="form-control" placeholder="Enter File No." />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">98. Proceedings Date *</label>
+                    <input type="text" class="form-control" />
+                  </div>
+                  <div class="col-md-12 mb-3">
+                    <label class="form-label">99. Upload Commissionerate / S.P. Office Proceedings *</label>
+                    <input type="text" class="form-control" placeholder="Enter Proceedings Details" />
+                  </div>
+                </div>
+
+                <!-- Additional Attachments -->
+                <div class="mb-4">
+                  <label class="form-label">100. Upload Other Attachments (If any)</label>
+                  <div class="input-group mb-2">
+                    <!-- File Input -->
+                    <input type="text" class="form-control" placeholder="Enter Attachment Details" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Appeal Details Section -->
+          <div class="card border-primary mb-4">
+            <div class="card-body">
+            <h5 >Appeal Details</h5>
+            <div class="row align-items-center">
+              <!-- Has legal opinion obtained -->
+              <div class="col-md-6">
+                <label class="form-label">101. Has legal opinion obtained?</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Yes or No"
+                />
+              </div>
+
+              <!-- Is the case fit for appeal -->
+              <div class="col-md-6 mt-3">
+                <label class="form-label">102. Is the case fit for appeal?</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Yes or No"
+                />
+              </div>
+
+              <!-- Has the government approved for appeal -->
+              <div class="col-md-6 mt-3">
+                <label class="form-label">103. Has the government approved for appeal?</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Yes or No"
+                />
+              </div>
+
+              <!-- Who has filed the appeal -->
+              <div class="col-md-6 mt-3">
+                <label class="form-label">104. Who has filed the appeal?</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Victim or Government"
+                />
+              </div>
+
+              <!-- Name of the Designated/ Special court -->
+              <div class="col-md-6 mt-3">
+                <label class="form-label">105. Name of the Designated/ Special court</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Court Name"
+                />
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acquitred -->
+      <div>
+        <div>
+          <div class="card border-primary">
+            <div class="card-body">
+              <h4 class="mb-4">Case Trial and Court Details</h4>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">1. Name of the Designated / Special court *</label>
+                  <input type="text" class="form-control" placeholder="Enter Name" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">2. District in which court is present *</label>
+                  <input type="text" class="form-control" placeholder="Enter District Name" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">3. Case Number Report (CNR) / Special SC number *</label>
+                  <input type="text" class="form-control" placeholder="Enter Case Number" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">4. Special Public Prosecutor's Name *</label>
+                  <input type="text" class="form-control" placeholder="Enter Name" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">5. Special Public Prosecutor's Phone Number *</label>
+                  <input type="text" class="form-control" placeholder="Enter Phone Number" maxlength="10" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card border-primary mb-4 mt-3">
+            <div class="card-body">
+              <h4 class="mb-4">Select Hearing Date</h4>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">6. First Hearing Date *</label>
+                  <input type="text" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">7. Has a Judgement been awarded in the case? *</label>
+                  <input type="text" class="form-control" placeholder="Enter Yes or No" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card border-primary mb-4">
+              <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">8. Next Hearing Date *</label>
+                  <input type="text" class="form-control" placeholder="Select Next Hearing Date" />
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">9. Reason for Next Hearing *</label>
+                  <input type="text" class="form-control" placeholder="Enter Reason" />
+                </div>
+              </div>
+              <div class="row align-items-center">
+                <div class="col-lg-6">
+                  <label class="form-label">10. Has a Judgement been awarded in the case? *</label>
+                </div>
+                <div class="col-md-3">
+                  <input type="text" class="form-control" placeholder="Enter Yes or No" />
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card border-primary mb-4">
+              <div class="card-body">
+              <h5>Judgement Details</h5>
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <label class="form-label">11. Nature of Judgement *</label>
+                  <input type="text" class="form-control" placeholder="Enter Nature of Judgement" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">12. Upload Judgement Copy *</label>
+                  <input type="text" class="form-control" />
+                </div>
+              </div>
+              </div>
+            </div>
+            <div class="card border-primary mb-4">
+              <div class="card-body">
+              <h5 >Appeal Details</h5>
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <label class="form-label">13. Has legal opinion obtained?</label>
+                  <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Yes or No"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">15. Is the case fit for appeal?</label>
+                  <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Yes or No"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">16. Has the government approved for appeal?</label>
+                  <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Yes or No"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">17. Who has filed the appeal?</label>
+                  <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Yes or No"/>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+    </div>
+
+
+
+  <!-- Modal Footer -->
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      [disabled]="currentStep === 0"
+      (click)="previousStep()"
+    >
+      Previous
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="currentStep === steps.length - 1"
+      (click)="nextStep()"
+    >
+      Next
+    </button>
+    <button type="button" class="btn btn-secondary me-2" (click)="modal.dismiss()">Close</button>
+  </div>
+</ng-template>

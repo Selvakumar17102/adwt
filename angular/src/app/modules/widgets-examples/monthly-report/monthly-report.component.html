@@ -1,0 +1,125 @@
+<div class="card">
+  <div class="card-header border-0 pt-6">
+    <div class="card-title">
+      <div class="d-flex align-items-center position-relative my-1">
+        <input type="text" [(ngModel)]="searchText" (input)="applyFilters()"
+          class="form-control form-control-solid w-250px ps-12" placeholder="Search Reports" />
+      </div>
+    </div>
+    <div class="toolbar mb-3">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Select Columns</mat-label>
+        <mat-select [(ngModel)]="selectedColumns" (selectionChange)="onColumnSelectionChange()" multiple>
+          <mat-option *ngFor="let column of displayedColumns" [value]="column.field">
+            {{ column.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="d-flex gap-3 mb-3 p-4">
+    <select class="form-select" [(ngModel)]="selectedDistrict" (change)="applyFilters()">
+      <option value="" selected disabled>Select One</option>
+      <option *ngFor="let district of districts" [value]="district">{{ district }}</option>
+    </select>
+
+    <select class="form-select" [(ngModel)]="selectedNatureOfOffence" (change)="applyFilters()">
+      <option value="" selected disabled>Select One</option>
+      <option *ngFor="let nature of natureOfOffences" [value]="nature">{{ nature }}</option>
+    </select>
+    
+
+    <select class="form-select" [(ngModel)]="selectedStatusOfCase" (change)="applyFilters()">
+      <option value="" selected disabled>Select One</option>
+      <option *ngFor="let status of caseStatuses" [value]="status">{{ status }}</option>
+    </select>
+
+    <select class="form-select" [(ngModel)]="selectedStatusOfRelief" (change)="applyFilters()">
+      <option value="" selected disabled>Select One</option>
+      <option *ngFor="let reliefStatus of statusesOfRelief" [value]="reliefStatus">
+        {{ reliefStatus }}
+      </option>
+    </select>
+
+  </div>
+
+  <div class="card-body pt-0 overflow-auto">
+    <table class="table table-bordered table-responsive">
+      <thead>
+        <tr>
+          <th *ngFor="let column of displayedColumns" [hidden]="!column.visible">
+            <div *ngIf="column.field === 'caseStatus'; else defaultHeader">
+              <label>{{ column.label }}</label>
+              <select class="form-select" [(ngModel)]="selectedCaseStatus" (change)="filterByCaseStatus()">
+                <option value="">All</option>
+                <option *ngFor="let status of getCaseStatusDropdown()" [value]="status">{{ status }}</option>
+              </select>
+            </div>
+            <ng-template #defaultHeader>
+              {{ column.label }}
+            </ng-template>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let report of paginatedData()">
+          <td *ngFor="let column of displayedColumns" [hidden]="!column.visible">
+            <ng-container [ngSwitch]="column.field">
+              <!-- Special Cases for Fields -->
+              <span *ngSwitchCase="'courtDistrict'">{{ report.caseStatus === 'Under Investigation' ? 'NA' : report.courtDistrict }}</span>
+              <span *ngSwitchCase="'courtName'">{{ report.caseStatus === 'Under Investigation' ? 'NA' : report.courtName }}</span>
+              <span *ngSwitchCase="'caseNumber'">{{ report.caseStatus === 'Under Investigation' ? 'NA' : report.caseNumber }}</span>
+              <span *ngSwitchCase="'caseStatus'">
+                <select class="form-select" (change)="onStatusChange($event, report)">
+                  <option *ngFor="let status of getCaseStatusDropdown()" [value]="status">{{ status }}</option>
+                </select>
+              </span>
+              <!-- Editable Text Boxes for Reason Columns -->
+              <span *ngSwitchCase="'reasonPreviousMonth'">
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="report.reasonPreviousMonth"
+                  placeholder="Enter reason for previous month"
+                />
+              </span>
+              <span *ngSwitchCase="'reasonCurrentMonth'">
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="report.reasonCurrentMonth"
+                  placeholder="Enter reason for current month"
+                />
+              </span>
+              <!-- Default Case -->
+              <span *ngSwitchDefault>{{ report[column.field] }}</span>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button class="btn btn-primary mt-3" (click)="saveData()">Save Changes</button>
+
+    <nav *ngIf="filteredData.length > itemsPerPage" class="d-flex justify-content-end mt-3">
+      <ul class="pagination">
+        <li class="page-item" [class.disabled]="page === 1">
+          <button class="page-link" (click)="previousPage()">Previous</button>
+        </li>
+        <li class="page-item" *ngFor="let pageNum of totalPagesArray()">
+          <button class="page-link" (click)="goToPage(pageNum)" [class.active]="page === pageNum">
+            {{ pageNum }}
+          </button>
+        </li>
+        <li class="page-item" [class.disabled]="page === totalPages()">
+          <button class="page-link" (click)="nextPage()">Next</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  
+  
+
+
+
+
+</div>

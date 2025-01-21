@@ -1,0 +1,152 @@
+<div class="row g-5 g-xl-8">
+  <!-- Card Wrapper -->
+  <div class="card">
+    <div class="card-header border-0 pt-6">
+      <!-- Search Bar -->
+      <div class="card-title">
+        <div class="d-flex align-items-center position-relative my-1">
+          <i class="fas fa-search fs-3 position-absolute ms-5"></i>
+          <input
+            type="text"
+            [(ngModel)]="searchText"
+            class="form-control form-control-solid w-250px ps-12"
+            placeholder="Search"
+          />
+        </div>
+      </div>
+
+      <!-- Add Button -->
+      <div class="card-toolbar">
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-primary" (click)="openModal()">
+            <i class="fas fa-plus-circle"></i> Add Police Station
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Body -->
+    <div class="card-body pt-0">
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Sl.No</th>
+            <th>District Name</th>
+            <th>Stattion name</th>
+            <th>Circle</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let district of filteredDistricts() | paginate: { itemsPerPage: 10, currentPage: page }; let i = index">
+            <td>{{ (page - 1) * 10 + i + 1 }}</td>
+            <td>{{ district.city_or_district }}</td>
+            <td>{{ district.station_name }}</td>
+            <td>{{ district.circle }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-success': district.status === 1,
+                'badge-danger': district.status === 0
+              }">
+                {{ district.status === 1 ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <!-- Dropdown button with actions -->
+              <div ngbDropdown class="me-0">
+                <button ngbDropdownToggle class="btn btn-circle btn-icon btn-bg-light btn-active-color-primary">
+                  <i class="bi bi-three-dots-vertical fs-3"></i>
+                </button>
+                <div ngbDropdownMenu class="menu menu-sub menu-sub-dropdown">
+                  <button ngbDropdownItem (click)="editStation(district, i)">Edit</button>
+                  <button ngbDropdownItem (click)="confirmDelete(i)">Delete</button>
+                  <button ngbDropdownItem (click)="toggleStatus(district)">
+                    {{ district.status === 1 ? 'Set Inactive' : 'Set Active' }}
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination Controls -->
+      <div class="d-flex justify-content-end align-items-center">
+        <pagination-controls (pageChange)="page = $event"></pagination-controls>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Template -->
+  <ng-template #formModal let-modal>
+    <div class="modal-header">
+      <h5 class="modal-title">{{ editIndex !== null ? 'Edit' : 'Add' }} Police Station</h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
+    </div>
+    <div class="modal-body">
+      <form #myForm="ngForm">
+        <!-- District Name Dropdown -->
+        <div class="mb-3">
+          <label for="city_or_district" class="form-label">City Or District Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="city_or_district"
+            [(ngModel)]="districtModel.city_or_district"
+            name="city_or_district"
+            required
+            #city_or_districtCtrl="ngModel"
+            [ngClass]="{ 'is-invalid': city_or_districtCtrl.invalid && city_or_districtCtrl.touched }"
+          />
+          <div *ngIf="city_or_districtCtrl.invalid && city_or_districtCtrl.touched" class="invalid-feedback">
+            City Or District Name is required.
+          </div>
+        </div>
+
+
+        <!-- Police Range Field -->
+        <div class="mb-3">
+          <label for="station_name" class="form-label">Station name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="station_name"
+            [(ngModel)]="districtModel.station_name"
+            name="station_name"
+            required
+            #station_nameCtrl="ngModel"
+            [ngClass]="{ 'is-invalid': station_nameCtrl.invalid && station_nameCtrl.touched }"
+          />
+          <div *ngIf="station_nameCtrl.invalid && station_nameCtrl.touched" class="invalid-feedback">
+            Station name is required.
+          </div>
+        </div>
+
+        <!-- Police Zone Field -->
+        <div class="mb-3">
+          <label for="circle" class="form-label">circle</label>
+          <input
+            type="text"
+            class="form-control"
+            id="circle"
+            [(ngModel)]="districtModel.circle"
+            name="circle"
+            required
+            #circleCtrl="ngModel"
+            [ngClass]="{ 'is-invalid': circleCtrl.invalid && circleCtrl.touched }"
+          />
+          <div *ngIf="circleCtrl.invalid && circleCtrl.touched" class="invalid-feedback">
+            circle is required.
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Modal Footer with Save and Cancel buttons -->
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="closeModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="submitForm(myForm)" [disabled]="myForm.invalid">Save</button>
+    </div>
+  </ng-template>
+</div>

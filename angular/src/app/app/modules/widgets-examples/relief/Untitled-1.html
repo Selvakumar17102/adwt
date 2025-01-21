@@ -1,0 +1,74 @@
+   <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              Proceedings Details
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <!-- Proceedings File Number -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Proceedings File Number:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter File Number"
+                    formControlName="secondInstallmentProceedingsFileNumber"
+                  />
+                </div>
+
+                <!-- Proceedings File Date -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Proceedings File Date:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="date"
+                    class="form-control"
+                    formControlName="secondInstallmentProceedingsFileDate"
+                  />
+                </div>
+
+                <!-- Upload Proceedings Document -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Upload Proceedings Document:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="file"
+                    class="form-control"
+                    formControlName="secondInstallmentUploadDocument"
+                  />
+                </div>
+
+                <!-- PFMS Portal -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Has the beneficiary details uploaded in PFMS portal?</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <select class="form-control" formControlName="secondInstallmentPfmsPortalUploaded">
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+
+                <!-- Date of Disbursement -->
+                <div class="col-md-8 mb-3">
+
+                  <label class="form-label">Date of Disbursement of Relief Amount:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="date"
+                    class="form-control"
+                    formControlName="secondInstallmentDateOfDisbursement"
+                  />
+                </div>
+                <div class="text-left mt-4">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+              </div>
+            </div>
+          </div>

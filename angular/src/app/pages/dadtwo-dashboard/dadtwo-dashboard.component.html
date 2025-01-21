@@ -1,0 +1,276 @@
+<div class="card">
+  <div class="card-header mt-0 p-4">
+    <h2 class="card-title" style="font-size: 1.8rem; font-weight: 700">Relife DashBoard</h2>
+  </div>
+  <div class="card-body">
+
+    <div class="filter-bar-container mb-4">
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.status" (change)="applyFilters()">
+				<option value="" disabled selected>Before / After 2016</option>
+				<option *ngFor="let option of filterOptions.status" [value]="option.key">
+				  {{ option.value }}
+				</option>
+			  </select>
+			</div>
+		  
+			<!-- Districts -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.district" (change)="applyFilters()">
+				<option value="" disabled selected>Districts</option>
+				<option *ngFor="let option of filterOptions.district" [value]="option">
+				  {{ option }}
+				</option>
+			  </select>
+			</div>
+		  
+			<!-- Caste -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.caste" (change)="applyFilters()">
+				<option value="" disabled selected>Caste</option>
+				<option *ngFor="let option of filterOptions.caste" [value]="option">
+				  {{ option }}
+				</option>
+			  </select>
+			</div>
+		  
+			<!-- Subcaste -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.subcaste" (change)="applyFilters()">
+				<option value="" disabled selected>Subcaste</option>
+				<option *ngFor="let option of filterOptions.subcaste" [value]="option">
+				  {{ option }}
+				</option>
+			  </select>
+			</div>
+		  
+			<!-- Gender -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.gender" (change)="applyFilters()">
+				<option value="" disabled selected>Gender</option>
+				<option *ngFor="let option of filterOptions.gender" [value]="option">
+				  {{ option }}
+				</option>
+			  </select>
+			</div>
+		  
+			<!-- Date Filter -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.dateRange" (change)="onDateRangeChange()">
+				<option value="" disabled selected>Date</option>
+				<option value="today">Today</option>
+				<option value="week">This Week</option>
+				<option value="month">This Month</option>
+				<option value="year">This Year</option>
+				<!-- <option value="custom">Custom Range</option> -->
+			  </select>
+			</div>
+		  
+			<!-- Custom Date Range -->
+			<!-- <div class="filter-item" *ngIf="selectedFilters.dateRange === 'custom'">
+			  <input type="date" class="filter-input" [(ngModel)]="selectedFilters.customFromDate" placeholder="From Date" />
+			  <input type="date" class="filter-input" [(ngModel)]="selectedFilters.customToDate" placeholder="To Date" />
+			  <button class="apply-button" (click)="applyCustomDateRange()">Apply</button>
+			</div> -->
+		</div>
+
+    <div class="row text-center">
+      <div class="col-md-4" *ngFor="let card of headerCards">
+        <div class="card text-center mb-3">
+          <div
+            class="card-body d-flex align-items-center justify-content-between">
+            <img src="assets/icons/v1/totalCases.png" alt="Case Icon" class="img-fluid" style="max-width: 120px"/>
+            <div class="text-center" style="margin: auto">
+              <h5 class="card-title" style="font-size: 1.275rem; font-weight: 500">{{ card.title }}</h5>
+              <strong>{{ card.value }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row text-center mb-4">
+      <div class="col-md-4" *ngFor="let card of redZoneCards">
+        <div class="card border-danger shadow-sm">
+          <div class="card-body" style="padding: 1rem">
+            <div class="d-flex align-items-center justify-content-center">
+              <img src="assets/icons/v1/pendingCases.png" alt="Case Icon" class="img-fluid" style="max-width: 120px"/>
+              <div>
+                <strong>{{ card.value }}</strong>
+                <p class="text-danger">{{ card.title }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title" style="font-size: 1.275rem; font-weight: 500">Redzone Cases Details</h5>
+          <div>
+            <input type="text" class="form-control" placeholder="Search cases" style="width: 300px"/>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="bg-light">
+              <tr>
+                <th style="font-size: 1.275rem; font-weight: 500">FIR No.</th>
+                <th style="font-size: 1.275rem; font-weight: 500">District</th>
+                <th style="font-size: 1.275rem; font-weight: 500">Pending Days</th>
+                <th style="font-size: 1.275rem; font-weight: 500">Status</th>
+                <th style="font-size: 1.275rem; font-weight: 500">1st Relief Given</th>
+                <th style="font-size: 1.275rem; font-weight: 500">2nd Relief Given</th>
+                <th style="font-size: 1.275rem; font-weight: 500">3rd Relief Given</th>
+                <th style="font-size: 1.275rem; font-weight: 500">Priority</th>
+                <th style="font-size: 1.275rem; font-weight: 500">Next Action Due</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let caseItem of redZoneCases">
+                <td>{{ caseItem.firNo }}</td>
+                <td>{{ caseItem.district }}</td>
+                <td>{{ caseItem.pendingDays }}</td>
+                <td>{{ caseItem.status }}</td>
+                <td>{{ caseItem.firstReliefGiven ? "Yes" : "No" }}</td>
+                <td>{{ caseItem.firstReliefGiven ? "Yes" : "No" }}</td>
+                <td>{{ caseItem.firstReliefGiven ? "Yes" : "No" }}</td>
+                <td>
+                  <span class="badge"
+                    [ngClass]="{
+                      'badge-critical': caseItem.priority === 'Critical',
+                      'badge-high': caseItem.priority === 'High',
+                      'badge-medium': caseItem.priority === 'Medium',
+                      'badge-low': caseItem.priority === 'Low'
+                    }">
+                    {{ caseItem.priority }}
+                  </span>
+                </td>
+                <td>{{ caseItem.nextActionDue }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-4">
+      <div class="col-12 col-sm-6 col-md-3" *ngFor="let card of cards">
+        <div class="card text-center">
+          <div class="card-body" style="padding: 1rem;">
+            <h5 class="card-title" style="font-size: 1.275rem; font-weight: 500">{{ card.title }}</h5>
+            <div class="semi-circle-wrapper">
+              <svg viewBox="0 0 100 50" class="semi-circle">
+                <path
+                  d="M 10,50 A 40,40 0 0,1 90,50"
+                  [attr.stroke]="
+                    card.status === 'given' ? '#e0f3e8' : '#ffe8d4'
+                  "
+                  stroke-width="12"
+                  fill="none"
+                ></path>
+                <path
+                  d="M 10,50 A 40,40 0 0,1 90,50"
+                  [attr.stroke]="
+                    card.status === 'given' ? '#28a745' : '#fd7e14'
+                  "
+                  stroke-width="12"
+                  fill="none"
+                  [attr.stroke-dasharray]="getStrokeDashArray(card.percentage)"
+                  stroke-dashoffset="0"
+                ></path>
+              </svg>
+              <div class="percentage-text">
+                <strong>{{ card.percentage }}%</strong>
+              </div>
+            </div>
+            <strong>{{ card.total | number }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-4">
+      <!-- <div class="col-md-6">
+        <div *ngFor="let stat of statistics" class="card mb-3 shadow-sm d-flex flex-row align-items-center">
+          <div class="p-3">
+            <img src="assets/icons/pendingCases.png" alt="Icon description" class="img-fluid" style="max-width: 120px"/>
+          </div>
+          <div class="p-3">
+            <h5 class="card-title" style="font-size: 1.275rem; font-weight: 500">{{ stat.description }}</h5>
+            <strong>{{ stat.value | number }}</strong>
+          </div>
+        </div>
+      </div> -->
+
+      
+
+      <div class="col-md-12">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="card-title" style="font-size: 1.275rem; font-weight: 500; margin: auto">
+              Total Cases where&nbsp;
+              <select [(ngModel)]="selectedFilter" class="styled-select" (change)="updateFilter()">
+                <option value="Job">Job</option>
+                <option value="Pension">Pension</option>
+                <option value="Patta">Patta</option>
+                <option value="Education">Education</option>
+              </select>
+              &nbsp;
+              is Given at Districts
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="scroller">
+                <canvas id="districtBarChart"></canvas>
+            </div>
+          </div>
+        
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row mt-4">
+
+      <div class="col-md-12">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 style="font-size: 1.275rem; font-weight: 500; margin: auto">
+              Total Cases where&nbsp;
+              <select [(ngModel)]="selectedFilter1" class="styled-select" (change)="updateFilter1()">
+                <option value="Job">Job</option>
+                <option value="Pension">Pension</option>
+                <option value="Patta">Patta</option>
+                <option value="Education">Education</option>
+              </select>
+              &nbsp;
+              is Pending at Districts
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="scroller1">
+              <canvas id="districtBarChart1"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="card-title" style="font-size: 1.275rem; font-weight: 500">Status of Relief</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-center">
+              <canvas id="pieChart" style="max-width: 300px; max-height: 300px; width: 100%; height: auto;"></canvas>
+              <div class="chart-legend p-4">
+                <span class="legend-item"><span class="dot blue"></span> Relief Pending</span>
+                <span class="legend-item"><span class="dot light-blue"></span> Relief Given</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

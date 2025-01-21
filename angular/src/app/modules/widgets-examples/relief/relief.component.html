@@ -1,0 +1,572 @@
+
+
+<div *ngIf="firDetails">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3>Relief Processing</h3>
+      <button class="btn btn-primary">View FIR</button>
+    </div>
+    <div class="card-body">
+      <div class="row text-left">
+        <div class="col-md-3 mb-3">
+          <strong>FIR Number:</strong>
+          <p class="text-dark">{{ firDetails.fir_id || 'N/A' }}</p>
+        </div>
+        <div class="col-md-3 mb-3">
+          <strong>Police Station Details:</strong>
+          <p class="text-dark">{{ firDetails.police_station || 'N/A' }}</p>
+        </div>
+        <div class="col-md-3 mb-3">
+          <strong>Date of Reporting:</strong>
+          <p class="text-dark">{{ firDetails.date_of_registration || 'N/A' }}</p>
+        </div>
+        <div class="col-md-3 mb-3">
+          <strong>Date of Occurrence:</strong>
+          <p class="text-dark">{{ firDetails.date_of_occurrence || 'N/A' }}</p>
+        </div>
+        <!-- <div class="col-md-3 mb-3">
+          <strong>Nature of Offence:</strong>
+          <p class="text-dark">{{ firDetails.nature_of_offence || 'N/A' }}</p>
+        </div> -->
+        <div class="col-md-3 mb-3">
+          <strong>Place of Occurrence:</strong>
+          <p class="text-dark">{{ firDetails.place_of_occurrence || 'N/A' }}</p>
+        </div>
+        <div class="col-md-3 mb-3">
+          <strong>Number of Victims:</strong>
+          <p class="text-dark">{{ firDetails.number_of_victim || 'N/A' }}</p>
+        </div>
+        <div class="col-md-3 mb-3">
+          <strong>Number of Accused:</strong>
+          <p class="text-dark">{{ firDetails.number_of_accused || 'N/A' }}</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!firDetails" class="text-center mt-4">
+  <h4>Loading FIR Details...</h4>
+</div>
+
+
+
+  <!-- Tabs Section for Installments -->
+  <div class="card mt-4">
+    <div class="card-header">
+      <ul class="nav nav-tabs">
+        <li class="nav-item" *ngFor="let tab of tabs; let i = index">
+          <a
+            class="nav-link"
+            [class.active]="currentTab === i"
+            [class.disabled]="!enabledTabs[i]"
+            (click)="selectTab(i)"
+            >{{ tab }}</a
+          >
+        </li>
+      </ul>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="reliefForm">
+
+        <div class="col-md-4 mb-3">
+          <strong>Date of Receipt of Proceedings from SJ&HRs:</strong>
+          <input
+            type="date"
+            class="form-control"
+            placeholder="Select Date"
+            formControlName="proceedingsReceiptDate"
+          />
+        </div>
+        <div *ngIf="loading">Loading...</div>
+        <!-- Installment Section -->
+        <div *ngIf="currentTab === 0">
+
+          <div *ngIf="!loading">
+          <!-- Victim and Relief Details Card -->
+          <div formArrayName="victims">
+            <div *ngFor="let victim of victimsArray.controls; let i = index" [formGroupName]="i">
+              <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                  Victim and Relief Details - {{ i + 1 }}
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <!-- Victim Name -->
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Victim Name:</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter Victim Name"
+                        formControlName="firstInstallmentVictimName"
+                      />
+                    </div>
+
+                    <!-- Bank Account Number -->
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Bank Account Number of the Victim:</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter Account Number"
+                        formControlName="firstInstallmentBankAccountNumber"
+                      />
+                    </div>
+
+                    <!-- IFSC Code -->
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">IFSC Code:</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter IFSC Code"
+                        formControlName="firstInstallmentIfscCode"
+                      />
+                    </div>
+
+                    <!-- Bank Name -->
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Bank Name:</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter Bank Name"
+                        formControlName="firstInstallmentBankName"
+                      />
+                    </div>
+
+                    <!-- Relief Amounts -->
+                    <div class="col-md-8 mt-4">
+                      <label class="form-label">
+                        Eligible first stage relief amount for the victim as per the SC and ST Prevention of Atrocities Act:
+                      </label>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <input
+                        type="number"
+                        class="form-control"
+                        placeholder="Enter Relief Amount"
+                        formControlName="firstInstallmentReliefScst"
+                      />
+                    </div>
+
+                    <div class="col-md-8 mb-3">
+                      <label class="form-label">
+                        Eligible first stage relief amount for the victim (ex-gratia) by the Govt. of Tamil Nadu:
+                      </label>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <input
+                        type="number"
+                        class="form-control"
+                        placeholder="Enter Ex-Gratia Amount"
+                        formControlName="firstInstallmentReliefExGratia"
+                      />
+                    </div>
+
+                    <div class="col-md-8 mb-3">
+                      <label class="form-label">Total eligible amount for the victim for the first stage of relief:</label>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                      <input
+                        type="number"
+                        class="form-control"
+                        placeholder="Enter Total Relief Amount"
+                        formControlName="firstInstallmentTotalRelief"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+</div>
+          <!-- Proceedings Details Card -->
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              Proceedings Details
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <!-- File Number -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Proceedings File Number:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter File Number"
+                    formControlName="firstInstallmentProceedingsFileNumber"
+                  />
+                </div>
+
+                <!-- File Date -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Proceedings File Date:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="date"
+                    class="form-control"
+                    formControlName="firstInstallmentProceedingsFileDate"
+                  />
+                </div>
+
+                <!-- Upload Document -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Upload Proceedings Document:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="file"
+                    class="form-control"
+                    formControlName="firstInstallmentUploadDocument"
+                  />
+                </div>
+
+                <!-- PFMS Portal -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Has the beneficiary details uploaded in PFMS portal?</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <select class="form-control" formControlName="firstInstallmentPfmsPortalUploaded">
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+
+                <!-- Date of Disbursement -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Date of Disbursement of Relief Amount:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="date"
+                    class="form-control"
+                    formControlName="firstInstallmentDateOfDisbursement"
+                  />
+                </div>
+                  <!-- Submit Button -->
+          <div class="text-left mt-4">
+            <button type="submit" class="btn btn-primary" (click)="onFirstInstallmentSubmit()">Submit</button>
+          </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+
+
+
+        <div *ngIf="currentTab === 1">
+          <!-- Victim and Relief Details Card -->
+          <div formArrayName="secondInstallmentVictims">
+            <div *ngFor="let victim of secondInstallmentVictimsArray.controls; let i = index" [formGroupName]="i">
+              <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                  Victim and Relief Details - {{ i + 1 }}
+                </div>
+            <div class="card-body">
+              <div class="row">
+                <!-- Victim Name -->
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Victim Name:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter Victim Name"
+                    formControlName="secondInstallmentVictimName"
+                  />
+                </div>
+
+                <!-- Relief Amount Details -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">
+                    Eligible second stage relief amount for the victim as per the SC and ST Prevention of
+                    Atrocities Act:
+                  </label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="number"
+                    class="form-control"
+                    placeholder="Enter Relief Amount"
+                    formControlName="secondInstallmentReliefScst"
+                  />
+                </div>
+
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">
+                    Eligible second stage relief amount for the victim (ex-gratia) by the Govt. of Tamil Nadu:
+                  </label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="number"
+                    class="form-control"
+                    placeholder="Enter Ex-Gratia Amount"
+                    formControlName="secondInstallmentReliefExGratia"
+                  />
+                </div>
+
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Total eligible amount for the victim for the second stage of relief:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="number"
+                    class="form-control"
+                    placeholder="Enter Total Relief Amount"
+                    formControlName="secondInstallmentTotalRelief"
+                  />
+                </div>
+
+
+              </div>
+            </div>
+          </div>
+          </div>
+          </div>
+
+          <!-- Additional Details Card -->
+
+            <div class="card mb-4">
+              <div class="card-header bg-primary text-white">
+                Proceedings Details
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <!-- Proceedings File Number -->
+                  <div class="col-md-8 mb-3">
+                    <label class="form-label">Proceedings File Number:</label>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Enter File Number"
+                      formControlName="secondInstallmentProceedingsFileNumber"
+                    />
+                  </div>
+
+                  <!-- Proceedings File Date -->
+                  <div class="col-md-8 mb-3">
+                    <label class="form-label">Proceedings File Date:</label>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <input
+                      type="date"
+                      class="form-control"
+                      formControlName="secondInstallmentProceedingsFileDate"
+                    />
+                  </div>
+
+                  <!-- Upload Proceedings Document -->
+                  <div class="col-md-8 mb-3">
+                    <label class="form-label">Upload Proceedings Document:</label>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <input
+                      type="file"
+                      class="form-control"
+                      formControlName="secondInstallmentUploadDocument"
+                    />
+                  </div>
+
+                  <!-- PFMS Portal -->
+                  <div class="col-md-8 mb-3">
+                    <label class="form-label">Has the beneficiary details uploaded in PFMS portal?</label>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <select class="form-control" formControlName="secondInstallmentPfmsPortalUploaded">
+                      <option value="" disabled selected>Select an option</option>
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+
+                  <!-- Date of Disbursement -->
+                  <div class="col-md-8 mb-3">
+
+                    <label class="form-label">Date of Disbursement of Relief Amount:</label>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <input
+                      type="date"
+                      class="form-control"
+                      formControlName="secondInstallmentDateOfDisbursement"
+                    />
+                  </div>
+                  <div class="text-left mt-4">
+                    <button type="submit" class="btn btn-primary" (click)="onSecondInstallmentSubmit()">Submit</button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+
+        </div>
+
+
+
+
+        <div *ngIf="currentTab === 2">
+          <!-- Victim and Relief Details Card -->
+        <div formArrayName="thirdInstallmentVictims">
+          <div *ngFor="let victim of thirdInstallmentVictimsArray.controls; let i = index" [formGroupName]="i">
+            <div class="card mb-4">
+              <div class="card-header bg-primary text-white">
+                Victim and Relief Details - {{ i + 1 }}
+              </div>
+              <div class="card-body">
+              <div class="row">
+                <!-- Victim Name -->
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Victim Name:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter Victim Name"
+                    formControlName="thirdInstallmentVictimName"
+                  />
+                </div>
+
+                <!-- Relief Amount Details -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">
+                    Eligible third stage relief amount for the victim as per the SC and ST Prevention of
+                    Atrocities Act:
+                  </label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="number"
+                    class="form-control"
+                    placeholder="Enter Relief Amount"
+                    formControlName="thirdInstallmentReliefAct"
+                  />
+                </div>
+
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">
+                    Eligible third stage relief amount for the victim (ex-gratia) by the Govt. of Tamil Nadu:
+                  </label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="number"
+                    class="form-control"
+                    placeholder="Enter Ex-Gratia Amount"
+                    formControlName="thirdInstallmentReliefGovernment"
+                  />
+                </div>
+
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Total eligible amount for the victim for the third stage of relief:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="number"
+                    class="form-control"
+                    placeholder="Enter Total Relief Amount"
+                    formControlName="thirdInstallmentReliefTotal"
+                  />
+                </div>
+
+
+              </div>
+            </div>
+            </div>
+          </div>
+</div>
+          <!-- Additional Details Card -->
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              Additional Details
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <!-- Proceedings File Number -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Proceedings File Number:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter File Number"
+                    formControlName="thirdInstallmentProceedingsFileNumber"
+                  />
+                </div>
+
+                <!-- Proceedings File Date -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Proceedings File Date:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="date"
+                    class="form-control"
+                    formControlName="thirdInstallmentProceedingsFileDate"
+                  />
+                </div>
+
+                <!-- Upload Proceedings Document -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Upload Proceedings Document:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="file"
+                    class="form-control"
+                    formControlName="thirdInstallmentUploadDocument"
+                  />
+                </div>
+
+                <!-- PFMS Portal -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Has the beneficiary details uploaded in PFMS portal?</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <select class="form-control" formControlName="thirdInstallmentPfmsPortalUploaded">
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+
+                <!-- Date of Disbursement -->
+                <div class="col-md-8 mb-3">
+                  <label class="form-label">Date of Disbursement of Relief Amount:</label>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <input
+                    type="date"
+                    class="form-control"
+                    formControlName="thirdInstallmentDateOfDisbursement"
+                  />
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-left mt-4">
+                  <button type="submit" class="btn btn-primary"(click)="onThirdInstallmentSubmit()" >Submit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+
+
+    </div>
+  </div>
+

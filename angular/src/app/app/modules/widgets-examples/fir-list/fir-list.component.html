@@ -1,0 +1,151 @@
+<div class="card">
+  <div class="card-header border-0 pt-6">
+    <div class="card-title">
+      <div class="d-flex align-items-center position-relative my-1">
+        <i class="fas fa-search fs-3 position-absolute ms-5"></i>
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          (input)="applyFilters()"
+          class="form-control form-control-solid w-250px ps-12"
+          placeholder="Search FIR"
+        />
+      </div>
+    </div>
+    <div class="card-toolbar d-flex align-items-center gap-3">
+      <!-- Visible Columns with Drag-and-Drop -->
+      <mat-form-field appearance="outline" class="w-250px">
+        <mat-label>Selected Columns</mat-label>
+        <mat-select>
+          <div cdkDropList (cdkDropListDropped)="dropColumn($event)">
+            <mat-option *ngFor="let column of displayedColumns" cdkDrag>
+              <div class="d-flex align-items-center gap-2">
+                <mat-checkbox
+                  [checked]="column.visible"
+                  (change)="toggleColumnVisibility(column)"
+                >
+                  {{ column.label }}
+                </mat-checkbox>
+                <i class="fas fa-bars drag-handle" cdkDragHandle></i>
+              </div>
+            </mat-option>
+          </div>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+  </div>
+
+  <div class="card-body pt-0">
+    <!-- Filters -->
+    <div class="d-flex gap-3 mb-3">
+      <select class="form-select" [(ngModel)]="selectedDistrict" (change)="applyFilters()">
+        <option value="" selected disabled>Select One</option>
+        <option *ngFor="let district of districts" [value]="district">{{ district }}</option>
+      </select>
+
+      <select class="form-select" [(ngModel)]="selectedNatureOfOffence" (change)="applyFilters()">
+        <option value="" selected disabled>Select One</option>
+        <option *ngFor="let nature of naturesOfOffence" [value]="nature">{{ nature }}</option>
+      </select>
+
+      <select class="form-select" [(ngModel)]="selectedStatusOfCase" (change)="applyFilters()">
+        <option value="" selected disabled>Select One</option>
+        <option *ngFor="let status of statusesOfCase" [value]="status">{{ status }}</option>
+      </select>
+
+      <select class="form-select" [(ngModel)]="selectedStatusOfRelief" (change)="applyFilters()">
+        <option value="" selected disabled>Select One</option>
+        <option *ngFor="let reliefStatus of statusesOfRelief" [value]="reliefStatus">
+          {{ reliefStatus }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Show message if FIR list is empty -->
+    <div *ngIf="filteredFirList().length === 0" class="alert alert-warning">
+      No FIR data available.
+    </div>
+
+    <!-- Updated Table -->
+    <table *ngIf="filteredFirList().length > 0" class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th *ngFor="let column of displayedColumns" [hidden]="!column.visible">
+            {{ column.label }}
+            <i
+              *ngIf="column.sortable"
+              class="fas"
+              [ngClass]="getSortIcon(column.field)"
+              (click)="sortTable(column.field)"
+            ></i>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let fir of paginatedFirList(); let i = index">
+          <td *ngFor="let column of displayedColumns" [hidden]="!column.visible">
+            <ng-container [ngSwitch]="column.field">
+              <span *ngSwitchCase="'sl_no'">{{ (page - 1) * itemsPerPage + i + 1 }}</span>
+              <span *ngSwitchCase="'fir_id'">{{ fir.fir_id }}</span>
+              <span *ngSwitchCase="'police_city'">{{ fir.police_city }}</span>
+              <span *ngSwitchCase="'police_station'">{{ fir.police_station }}</span>
+              <span *ngSwitchCase="'created_by'">{{ fir.created_by || 'Super User' }}</span>
+              <span *ngSwitchCase="'created_at'">{{ fir.created_at | date: 'dd-MM-yyyy' }}</span>
+              <span *ngSwitchCase="'status'">
+                <span class="badge" [ngClass]="getStatusBadgeClass(fir.status)">
+                  {{ getStatusText(fir.status) }}
+                </span>
+              </span>
+              <span *ngSwitchCase="'actions'">
+                <div ngbDropdown class="d-inline-block">
+                  <button
+                    ngbDropdownToggle
+                    class="btn btn-circle btn-icon btn-bg-light btn-active-color-primary"
+                  >
+                    <i class="fas fa-ellipsis-h fs-3"></i>
+                  </button>
+                  <div ngbDropdownMenu>
+                    <!-- For status 0 to 7 -->
+                    <ng-container *ngIf="fir.status >= 0 && fir.status <= 8">
+                      <button ngbDropdownItem (click)="viewFIR(fir.fir_id)">View</button>
+                      <button ngbDropdownItem (click)="openEditPage(fir.fir_id)">Edit</button>
+                      <button ngbDropdownItem (click)="navigateToAlteredCase(fir.fir_id)">Altered Case</button>
+                      <button ngbDropdownItem (click)="deleteFIR(i, fir.fir_id)">Delete</button>
+                    </ng-container>
+
+                    <!-- For status 12 -->
+                    <ng-container *ngIf="fir.status === 9">
+                      <button ngbDropdownItem (click)="navigateToMistakeOfFact(fir.fir_id)">Re-Open Case</button>
+                      <button ngbDropdownItem (click)="deleteFIR(i, fir.fir_id)">Delete</button>
+                    </ng-container>
+                  </div>
+                </div>
+              </span>
+
+
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+
+    <!-- Pagination Controls -->
+    <nav *ngIf="filteredFirList().length > itemsPerPage" class="d-flex justify-content-end mt-3">
+      <ul class="pagination">
+        <li class="page-item" [class.disabled]="page === 1">
+          <button class="page-link" (click)="previousPage()">Previous</button>
+        </li>
+        <li class="page-item" *ngFor="let pageNum of totalPagesArray()">
+          <button class="page-link" (click)="goToPage(pageNum)" [class.active]="page === pageNum">
+            {{ pageNum }}
+          </button>
+        </li>
+        <li class="page-item" [class.disabled]="!hasNextPage()">
+          <button class="page-link" (click)="nextPage()">Next</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>

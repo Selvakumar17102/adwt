@@ -1,0 +1,21 @@
+.view-fir-btn {
+  border: 2px solid #00aaff; /* Light blue border color */
+  color: #00aaff;            /* Light blue text color */
+  background-color: transparent;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+
+  &:hover {
+    background-color: #e6f7ff; /* Light blue background on hover */
+    color: #007acc;
+    border-color: #007acc;
+  }
+
+  i {
+    font-size: 16px; /* Adjust icon size */
+  }
+}

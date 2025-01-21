@@ -1,0 +1,169 @@
+/* Stepper Container */
+.stepper {
+  display: flex;
+  align-items: center;
+  list-style-type: none;
+  padding: 0;
+  margin: 20px 0;
+  position: relative;
+  gap: 10px; /* Add space between items */
+}
+
+/* Step Item */
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.step-item.disabled {
+  cursor: not-allowed;
+  opacity: 0.6; /* Reduced opacity for disabled items */
+}
+
+.step-item.active .step-circle {
+  background-color: #ff9800; /* Active step color */
+  color: #fff;
+}
+
+.step-item.completed .step-circle {
+  background-color: #4caf50; /* Completed step color */
+  color: #fff;
+}
+
+/* Step Circle */
+.step-circle {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #ddd;
+  color: #666;
+  font-weight: bold;
+  transition: 0.3s;
+  z-index: 1;
+}
+
+/* Step Label */
+.step-label {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Connecting Line */
+.step-line {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 100%;
+  height: 4px;
+  background: #ccc; /* Default line color */
+  z-index: 0;
+  transition: background 0.3s;
+}
+
+.step-item.completed ~ .step-item .step-line {
+  background: #4caf50; /* Line color for completed steps */
+}
+
+.step-item.active ~ .step-item .step-line {
+  background: #ff9800; /* Line color for active step */
+}
+/* Container for stepper tabs */
+.stepper-tabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  gap: 10px;
+}
+
+/* Each stepper item */
+.stepper-item {
+  flex: 1;
+  position: relative;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+/* Active state */
+.stepper-item.active {
+  background-color: var(--bs-primary); /* Using Bootstrap's primary color */
+  color: white;
+  border-color: var(--bs-primary);
+}
+
+.stepper-item.completed {
+  background-color: #e9f5e9; /* Light color for completed steps */
+  color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+/* Step content wrapper */
+.step-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+/* Step number */
+.step-number {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  color: var(--bs-primary);
+  border: 1px solid var(--bs-primary);
+  border-radius: 50%;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.stepper-item.active .step-number,
+.stepper-item.completed .step-number {
+  background-color: var(--bs-primary);
+  color: #fff;
+}
+
+.stepper-item.active .step-label {
+  color: #fff;
+}
+
+.step-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.selected-text {
+  color: black !important;
+  font-weight: bold !important;
+}
+
+
+
+
+.column-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.drag-handle {
+  cursor: move;
+}
+
+mat-checkbox {
+  margin-right: 8px;
+}
+

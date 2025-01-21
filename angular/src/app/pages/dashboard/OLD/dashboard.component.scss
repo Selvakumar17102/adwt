@@ -1,0 +1,372 @@
+:host {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* Card Hover Effect */
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #e3f2fd;
+}
+
+.card {
+  border: none;
+  border-radius: 8px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  margin-bottom: 20px;
+}
+.card-header {
+  padding: 5px 10px;
+  font-size: 1rem;
+  font-weight: bold;
+}
+.card-body {
+  padding: 1.5rem;
+}
+
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+.circle-progress {
+  margin: auto;
+}
+p {
+  font-size: 16px;
+}
+
+.icon {
+  width: 60px;
+  height: 60px;
+}
+
+.card-body h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.card-body p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+ngx-charts-bar-horizontal {
+  margin: auto;
+  max-width: 900px;
+}
+
+
+
+/* Table Styling */
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th,
+.table td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table thead th {
+  font-weight: bold;
+}
+
+.table th, .table td {
+  text-align: left;
+  padding: 12px;
+  border: 1px solid #ddd;
+}
+
+.table th {
+  background-color: #f8f9fa;
+}
+
+/* Table Styling */
+
+.semi-circle-wrapper {
+  position: relative;
+  width: 240px;
+  height: 150px;
+  margin: 0 auto;
+}
+
+.semi-circle {
+  width: 200px;
+  height: 100px;
+}
+
+.percentage-text {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -70%);
+  font-size: 25px;
+  font-weight: bold;
+  color: #000;
+}
+
+
+/* Priority Badge Styling */
+
+
+.badge-critical {
+  background-color: red;
+  color: white;
+}
+
+.badge-high {
+  background-color: orange;
+  color: white;
+}
+
+.badge-medium {
+  background-color: yellow;
+  color: black;
+}
+
+.badge-low {
+  background-color: green;
+  color: white;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .card-body h2 {
+    font-size: 1.8rem;
+  }
+}
+
+
+
+.dashboard-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.chart-container {
+  width: 48%;
+  background-color: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 400px;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 2.2rem;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none; /* For Safari */
+  -moz-appearance: none; /* For Firefox */
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: #fff;
+  cursor: pointer;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6" fill="gray"><path d="M0 0l5 6 5-6H0z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+select:focus {
+  outline: none;
+}
+
+
+.styled-select {
+  border: 2px solid #007bff; /* Blue border */
+  border-radius: 20px; /* Rounded corners */
+  padding: 5px 40px; /* Padding inside the box */
+  font-size: 16px; /* Adjust font size */
+  color: #007bff; /* Text color */
+  background-color: #fff; /* White background */
+  appearance: none; /* Remove default browser styles */
+  -webkit-appearance: none; /* For Safari */
+  -moz-appearance: none; /* For Firefox */
+  outline: none; /* Remove focus outline */
+  cursor: pointer; /* Pointer cursor */
+  width: auto; /* Adjust to content */
+  text-align: center; /* Center-align text */
+}
+
+.styled-select:focus {
+  border-color: #0056b3; /* Darker blue on focus */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add glow effect */
+}
+
+.styled-select::after {
+  content: '\25BC'; /* Unicode for dropdown arrow */
+  font-size: 12px;
+  color: #007bff;
+}
+
+.styled-select option {
+  color: #000; /* Black text for dropdown items */
+}
+
+
+
+
+
+
+
+h5 {
+  margin-left: 10px;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Case Categories Section */
+.case-categories {
+  display: flex;
+  justify-content: space-between;
+  // flex-wrap: wrap;
+  // gap: 1rem;
+  align-items: center;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  min-width: 130px;
+  position: relative;
+}
+
+.category-item span {
+  font-size: 14px;
+  color: #666;
+}
+
+.category-item strong {
+  // color: #333;
+  display: block;
+  font-size: 25px;
+}
+
+.category-item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 10%;
+  right: 0;
+  height: 80%;
+  width: 1px;
+  background-color: #ccc; /* Light vertical line color */
+}
+
+.category-item:nth-child(odd) {
+  color: #007bff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .d-flex {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .case-categories {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .category-item {
+    font-size: 1rem;
+  }
+}
+
+
+.chart-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.legend-item {
+  font-size: 0.9rem;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.blue {
+  background-color: #007bff;
+}
+
+.light-blue {
+  background-color: #5bc0de;
+}
+
+.sky-blue {
+  background-color: #6c757d;
+}
+
+.map-container {
+  height: 400px;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-legend {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.normal {
+  background-color: #28a745;
+}
+
+.mild {
+  background-color: #ffc107;
+}
+
+.critical {
+  background-color: #dc3545;
+}

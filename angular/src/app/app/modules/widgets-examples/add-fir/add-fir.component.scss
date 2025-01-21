@@ -1,0 +1,169 @@
+/* Stepper Container */
+.stepper {
+  display: flex;
+  align-items: center;
+  list-style-type: none;
+  padding: 0;
+  margin: 20px 0;
+  position: relative;
+  gap: 20px; /* Add space between items */
+}
+
+/* Step Item */
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.step-item.disabled {
+  cursor: not-allowed;
+  opacity: 0.6; /* Reduced opacity for disabled items */
+}
+
+.step-item.active .step-circle {
+  background-color: #0066ff; /* Active step color */
+  color: #fff;
+}
+
+.step-item.completed .step-circle {
+  background-color: #4caf50; /* Completed step color */
+  color: #fff;
+}
+
+/* Step Circle */
+.step-circle {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #ddd; /* Default circle color */
+  color: #666; /* Default text color */
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  z-index: 2; /* Higher z-index to keep step above the line */
+}
+
+/* Step Label */
+.step-label {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #666; /* Default label color */
+}
+
+/* Connecting Line */
+.step-line {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  height: 4px;
+  background: #ccc; /* Default line color */
+  z-index: 1; /* Lower z-index to be behind the circles */
+  transition: background-color 0.3s ease, width 0.3s ease;
+  width: 100%;
+}
+
+/* Fix for Completed Steps */
+// .step-item.completed + .step-item .step-line {
+//   background: #4caf50; /* Green for completed steps */
+// }
+
+/* Fix for Active Steps */
+// .step-item.active + .step-item .step-line {
+//   background: #0066ff; /* Blue for active steps */
+// }
+
+/* Ensure Inactive Lines Stay Gray */
+.step-item:not(.completed):not(.active) + .step-item .step-line {
+  background: #ccc; /* Gray for inactive steps */
+}
+
+/* Main Tabs Container */
+.stepper-tabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Each Tab Item */
+.stepper-item {
+  flex: 1;
+  position: relative;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  padding: 10px;
+  background: #f8f9fa; /* Light gray for tabs */
+}
+
+.stepper-item.active {
+  background-color: #0066ff; /* Active tab color */
+  color: #fff;
+  border-color: #0066ff;
+}
+
+.stepper-item.completed {
+  background-color: #e9f5e9; /* Light green for completed tabs */
+  color: #4caf50;
+  border-color: #4caf50;
+}
+
+/* Step Content Wrapper */
+.step-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Step Number */
+.step-number {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  color: #0066ff;
+  border: 1px solid #0066ff;
+  border-radius: 50%;
+  font-weight: bold;
+  margin-right: 5px;
+  transition: all 0.3s ease;
+}
+
+.stepper-item.active .step-number {
+  background-color: #0066ff;
+  color: #fff;
+}
+
+// .stepper-item.completed .step-number {
+//   background-color: #4caf50;
+//   color: #fff;
+// }
+
+.stepper-item.active .step-label {
+  color: #fff;
+}
+
+.step-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Selected Text Style */
+.selected-text {
+  color: black !important;
+  font-weight: bold !important;
+}

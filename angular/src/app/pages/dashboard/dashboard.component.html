@@ -1,0 +1,381 @@
+<div class="card bg-secondary" >
+	<div class="card-header mt-0 p-4">
+		<h2 class="card-title" style="font-size: 1.8rem;font-weight: 700;">Atrocity Case Dashboard</h2>
+	</div>
+	<div class="card-body">
+	<div class="mt-2">
+
+		<div class="filter-bar-container">
+			<!-- Status of the Case -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.status" (change)="applyFilters()">
+				<option value="" disabled selected>Status of the Case</option>
+				<option *ngFor="let option of filterOptions.status" [value]="option.key">
+				  {{ option.value }}
+				</option>
+			  </select>
+			</div>
+
+			<!-- Districts -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.district" (change)="applyFilters()">
+				<option value="" disabled selected>Districts</option>
+				<option *ngFor="let option of filterOptions.district" [value]="option">
+				  {{ option }}
+				</option>
+			  </select>
+			</div>
+
+			<!-- Caste -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.caste" (change)="applyFilters()">
+				<option value="" disabled selected>Caste</option>
+				<option *ngFor="let option of filterOptions.caste" [value]="option">
+				  {{ option }}
+				</option>
+			  </select>
+			</div>
+
+			<!-- Subcaste -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.subcaste" (change)="applyFilters()">
+				<option value="" disabled selected>Subcaste</option>
+				<option *ngFor="let option of filterOptions.subcaste" [value]="option">
+				  {{ option }}
+				</option>
+			  </select>
+			</div>
+
+			<!-- Gender -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.gender" (change)="applyFilters()">
+				<option value="" disabled selected>Gender</option>
+				<option *ngFor="let option of filterOptions.gender" [value]="option">
+				  {{ option }}
+				</option>
+			  </select>
+			</div>
+
+			<!-- Date Filter -->
+			<div class="filter-item">
+			  <select class="filter-select" [(ngModel)]="selectedFilters.dateRange" (change)="onDateRangeChange()">
+				<option value="" disabled selected>Date</option>
+				<option value="today">Today</option>
+				<option value="week">This Week</option>
+				<option value="month">This Month</option>
+				<option value="year">This Year</option>
+				<option value="custom">Custom Range</option>
+			  </select>
+			</div>
+
+      <div class="filter-item" *ngIf="selectedFilters.dateRange === 'custom'">
+        <input type="date" class="filter-input" [(ngModel)]="selectedFilters.fromDate" placeholder="From Date" />
+        <input type="date" class="filter-input" [(ngModel)]="selectedFilters.toDate" placeholder="To Date" />
+
+      </div>
+
+      <!-- Clear Filters Button -->
+      <div class="filter-item">
+        <button class="clear-button" (click)="clearFilters()">Clear Filters</button>
+      </div>
+			<!-- Custom Date Range -->
+		</div>
+
+  		<div class="row mt-4">
+			<div class="col-md-4">
+				<div class="card text-center mb-3">
+					<div class="card-body d-flex align-items-center justify-content-between">
+						<img src="assets/icons/v1/totalCases.png" alt="Case Icon" class="img-fluid" style="max-width: 120px;">
+						<div class="text-center" style="margin: auto;">
+							<h5 class="card-title" style="font-size: 18px;font-weight: 500;">Total Number of Cases</h5>
+							<strong>{{ totalCases }}</strong>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card text-center mb-3">
+					<div class="card-body d-flex align-items-center justify-content-between">
+						<img src="assets/icons/v1/minorCases.png" alt="Case Icon" class="img-fluid" style="max-width: 120px;">
+						<div class="text-center" style="margin: auto;">
+							<h5 class="card-title" style="font-size: 18px;font-weight: 500;">Total Number of MC <br> (Minor Cases)</h5>
+							<strong>{{ minorCases }}</strong>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card text-center mb-3">
+					<div class="card-body d-flex align-items-center justify-content-between">
+						<img src="assets/icons/v1/pendingTrial.png" alt="Case Icon" class="img-fluid" style="max-width: 120px;">
+						<div class="text-center" style="margin: auto;">
+							<h5 class="card-title" style="font-size: 18px;font-weight: 500;">Total Number of Cases in PT <br>(Pending Trial)</h5>
+							<strong>{{ pendingTrials }}</strong>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="card mb-3">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-center">
+							<div class="d-flex align-items-center">
+								<img
+									src="assets/icons/v1/pendingTrial.png"
+									alt="Case Icon"
+									class="img-fluid" style="max-width: 120px;"
+								/>
+								<h5 class="card-title" style="font-size: 18px;font-weight: 500;">Total Number of Cases in PT (Pending Trial)</h5>
+							</div>
+							<div class="case-categories d-flex flex-row align-items-center">
+								<div class="category-item mx-2 text-center">
+									<strong>{{ cases['<1Year'] }}</strong>
+									<span>&lt; 1 Year</span>
+								</div>
+								<div class="category-item mx-2 text-center">
+									<strong>{{ cases['1-5Years'] }}</strong>
+									<span>1-5 Yrs</span>
+								</div>
+								<div class="category-item mx-2 text-center">
+									<strong>{{ cases['6-10Years'] }}</strong>
+									<span>6-10 Yrs</span>
+								</div>
+								<div class="category-item mx-2 text-center">
+									<strong>{{ cases['11-20Years'] }}</strong>
+									<span>11-20 Yrs</span>
+								</div>
+								<div class="category-item mx-2 text-center">
+									<strong>{{ cases['>20Years'] }}</strong>
+									<span>&gt; 20 Yrs</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="card mb-3">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-center">
+							<div class="d-flex align-items-center">
+								<img
+									src="assets/icons/v1/uICases.png"
+									alt="Case Icon"
+									class="img-fluid" style="max-width: 120px;"
+								/>
+								<h5 class="card-title" style="font-size: 18px;font-weight: 500;">Total Number of Cases in UI (Under Investigation)</h5>
+							</div>
+							<div class="case-categories d-flex flex-row align-items-center">
+								<div class="category-item mx-2 text-center">
+									<strong>{{ uicases['<2Mos'] }}</strong>
+									<span>&lt; 2 Mos</span>
+								</div>
+								<div class="category-item mx-2 text-center">
+									<strong>{{ uicases['2-4Mos'] }}</strong>
+									<span>2-4 Mos</span>
+								</div>
+								<div class="category-item mx-2 text-center">
+									<strong>{{ uicases['4-6Mos'] }}</strong>
+									<span>4-6 Mos</span>
+								</div>
+								<div class="category-item mx-2 text-center">
+									<strong>{{ uicases['6-12Mos'] }}</strong>
+									<span>6-12 Mos</span>
+								</div>
+								<div class="category-item mx-2 text-center">
+									<strong>{{ uicases['>1Years'] }}</strong>
+									<span>&gt; 1 Yrs</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-6">
+				<div class="card text-center mb-3">
+					<div class="card-body d-flex align-items-center justify-content-between">
+						<img src="assets/icons/v1/acquittedcase.png" alt="Case Icon" class="img-fluid" style="max-width: 120px;">
+						<div class="text-center" style="margin: auto;">
+							<h5 class="card-title" style="font-size: 18px;font-weight: 500;">Total Number of Acquitted</h5>
+							<strong>{{ acquitted }}</strong>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card text-center mb-3">
+					<div class="card-body d-flex align-items-center justify-content-between">
+						<img src="assets/icons/v1/convictedCase.png" alt="Case Icon" class="img-fluid" style="max-width: 120px;">
+						<div class="text-center" style="margin: auto;">
+							<h5 class="card-title" style="font-size: 18px;font-weight: 500;">Total Number of Convicted</h5>
+							<strong>{{ convicted }}</strong>
+						</div>
+					</div>
+				</div>
+			</div>
+
+  		</div>
+  		<div class="row mt-4">
+			<div class="col-md-6">
+				<div class="card shadow-sm">
+					<div class="card-header">
+						<h5 class="card-title" style="font-size: 18px;font-weight: 500;">Status of Case</h5>
+					</div>
+					<div class="card-body">
+						<div class="d-flex justify-content-left">
+							<canvas id="pieChart1" style="max-width: 300px; max-height: 300px; width: 100%; height: auto;"></canvas>
+							<div class="chart-legend m-20 p-4">
+								<span class="legend-item"><span class="dot red"></span> FIR</span>
+								<span class="legend-item"><span class="dot blue"></span> Chargesheet</span>
+								<span class="legend-item"><span class="dot yellow"></span> Trial</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card">
+					<div class="card-header">
+						<h5 class="card-title" style="font-size: 18px;font-weight: 500;">No. of Cases</h5>
+					</div>
+					<div class="card-body">
+						<div class="d-flex justify-content-left">
+							<canvas id="pieChart2" style="max-width: 300px; max-height: 300px; width: 100%; height: auto;"></canvas>
+
+							<div class="chart-legend m-20 p-4">
+								<span class="legend-item"><span class="dot red"></span> Death</span>
+								<span class="legend-item"><span class="dot blue"></span> Rape</span>
+								<span class="legend-item"><span class="dot yellow"></span> Others</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+  		</div>
+  		<div class="row">
+			<div class="col-md-6">
+				<div class="card">
+					<div class="card-header">
+						<div class="card-title">
+							<h5 class="card-title" style="font-size: 18px;font-weight: 500;">No. of PT pendency cases</h5>
+						</div>
+					</div>
+					<div class="card-body">
+						<canvas id="barChart" style="max-height: 300px; width: 100%;"></canvas>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card">
+					<div class="card-header">
+						<div class="card-title">
+							<h5 class="card-title" style="font-size: 18px;font-weight: 500;">No. of UI pendency cases</h5>
+						</div>
+					</div>
+					<div class="card-body">
+						<canvas id="barChart1" style="max-height: 300px; width: 100%;"></canvas>
+					</div>
+				</div>
+			</div>
+  		</div>
+		<div class="mt-4">
+			<div class="card p-4">
+				<div class="card-header">
+					<h5 class="card-title" style="font-size: 18px;font-weight: 500;">Annual Overview of Court Cases</h5>
+				</div>
+				<div class="mt-3">
+					<canvas id="lineChart" style="max-height: 400px; width: 100%; height: 400px;"></canvas>
+				</div>
+			</div>
+		</div>
+  		<div class="dashboard">
+    		<div class="row">
+      			<div class="col-md-6">
+        			<div class="card">
+		 				<div class="card-header">
+							<h5 class="card-title" style="font-size: 18px;font-weight: 500;">District-Wise Case Pendency Map PT</h5>
+						</div>
+						<div class="card-body d-flex align-items-start">
+							<!-- SVG -->
+							<div class="svg-container">
+							  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1591.1 1975.3" width="500px">
+								<ng-container *ngFor="let district of districtData">
+								  <path
+									class="st0"
+									[attr.id]="district.id"
+									[attr.d]="getPath(district.id)"
+									[attr.fill]="getDistrictColor(district.data.count)"
+                  matTooltip="{{ district.name }} - Count: {{ district.data.count }}"
+                  matTooltipPosition="above"
+									(click)="onDistrictClick(district)"
+									(mouseover)="onHover(district)"
+									(mouseout)="onHoverOut()"
+								  ></path>
+								</ng-container>
+							  </svg>
+							</div>
+
+							<!-- Legend -->
+							<div class="legend">
+							  <div class="legenditem">
+								<span class="dot" style="background-color: green;"></span> Normal
+							  </div>
+							  <div class="legenditem">
+								<span class="dot" style="background-color: yellow;"></span> Mild
+							  </div>
+							  <div class="legenditem">
+								<span class="dot" style="background-color: red;"></span> Critical
+							  </div>
+							</div>
+						  </div>
+
+        			</div>
+      			</div>
+
+				<div class="col-md-6">
+        			<div class="card">
+		 				<div class="card-header">
+							<h5 class="card-title" style="font-size: 18px;font-weight: 500;">District-Wise Case Pendency Map UI</h5>
+						</div>
+						<div class="card-body d-flex align-items-start">
+							<div class="svg-container" style="position: relative;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1591.1 1975.3" width="500px">
+                  <ng-container *ngFor="let district of districtData1">
+                    <path
+                      class="st0"
+                      [attr.id]="district.id"
+                      [attr.d]="getPath1(district.id)"
+                      [attr.fill]="getDistrictColor1(district.data.count)"
+                      matTooltip="{{ district.name }} - Count: {{ district.data.count }}"
+                      matTooltipPosition="above"
+                      (click)="onDistrictClick1(district)"
+                      (mouseover)="onHover1(district)"
+                      (mouseout)="onHoverOut1()"
+                    >
+                  </path>
+                  </ng-container>
+                </svg>
+              </div>
+							<div class="legend">
+								<div class="legenditem">
+									<span class="dot" style="background-color: green;"></span> Normal
+								</div>
+								<div class="legenditem">
+									<span class="dot" style="background-color: yellow;"></span> Mild
+								</div>
+								<div class="legenditem">
+									<span class="dot" style="background-color: red;"></span> Critical
+								</div>
+							</div>
+						</div>
+        			</div>
+      			</div>
+    		</div>
+  		</div>
+	</div>
+	</div>
+</div>
+
+
+
