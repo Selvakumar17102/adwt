@@ -759,151 +759,17 @@ exports.updateFirStatus = (req, res) => {
 
 
 
-// exports.handleStepFive = (req, res) => {
-//   const {
-//     firId,
-//     victimsRelief,
-//     totalCompensation,
-//     proceedingsFileNo,
-//     proceedingsDate,
-//     proceedingsFile,
-//     attachments,
-//   } = req.body;
-
-//   if (!firId) {
-//     return res.status(400).json({ message: 'FIR ID is missing.' });
-//   }
-
-//   const generateRandomId = (length = 6) => {
-//     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//     let result = '';
-//     for (let i = 0; i < length; i++) {
-//       result += characters.charAt(Math.floor(Math.random() * characters.length));
-//     }
-//     return result;
-//   };
-
-//   db.beginTransaction((err) => {
-//     if (err) return res.status(500).json({ message: 'Transaction error', error: err });
-
-//     // Insert or update victimsRelief
-//     const victimPromises = victimsRelief.map((victim, index) => {
-//       return new Promise((resolve, reject) => {
-//         const victimId = victim.victimId || ''; // Use existing victim_id or generate a new one
-//         const reliefId = victim.reliefId || generateRandomId(6);
-
-//         const query = `
-//           INSERT INTO victim_relief (
-//             victim_id, relief_id, fir_id, victim_name, community_certificate,
-//             relief_amount_scst, relief_amount_exgratia, relief_amount_first_stage, additional_relief
-//           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-//           ON DUPLICATE KEY UPDATE
-//             victim_name = VALUES(victim_name),
-//             community_certificate = VALUES(community_certificate),
-//             relief_amount_scst = VALUES(relief_amount_scst),
-//             relief_amount_exgratia = VALUES(relief_amount_exgratia),
-//             relief_amount_first_stage = VALUES(relief_amount_first_stage),
-//             additional_relief = VALUES(additional_relief)
-//         `;
-//         const values = [
-//           victimId, // Add victim_id here
-//           reliefId,
-//           firId,
-//           victim.victimName || `Victim ${index + 1}`,
-//           victim.communityCertificate || 'no',
-//           victim.reliefAmountScst || '0.00',
-//           victim.reliefAmountExGratia || '0.00',
-//           victim.reliefAmountFirstStage || '0.00',
-//           JSON.stringify(victim.additionalRelief || []),
-//         ];
-
-//         db.query(query, values, (err) => {
-//           if (err) return reject(err);
-//           resolve();
-//         });
-//       });
-//     });
-
-//     // Insert or update proceedings data
-//     const proceedingsPromise = new Promise((resolve, reject) => {
-//       const proceedingsId = generateRandomId(6);
-//       const query = `
-//         INSERT INTO proceedings_victim_relief (
-//           proceedings_id, fir_id, total_compensation, proceedings_file_no,
-//           proceedings_date, proceedings_file
-//         ) VALUES (?, ?, ?, ?, ?, ?)
-//         ON DUPLICATE KEY UPDATE
-//           total_compensation = VALUES(total_compensation),
-//           proceedings_file_no = VALUES(proceedings_file_no),
-//           proceedings_date = VALUES(proceedings_date),
-//           proceedings_file = VALUES(proceedings_file)
-//       `;
-//       const values = [
-//         proceedingsId,
-//         firId,
-//         totalCompensation || '0.00',
-//         proceedingsFileNo || null,
-//         proceedingsDate || null,
-//         proceedingsFile || null,
-//       ];
-
-//       db.query(query, values, (err) => {
-//         if (err) return reject(err);
-//         resolve();
-//       });
-//     });
-
-//     // Insert attachments into the `attachment_relief` table
-//     const attachmentPromises = attachments.map((attachment) => {
-//       return new Promise((resolve, reject) => {
-//         const attachmentId = generateRandomId(8);
-//         const query = `
-//           INSERT INTO attachment_relief (
-//             attachment_id, fir_id, file_name, file_path
-//           ) VALUES (?, ?, ?, ?)
-//         `;
-//         const values = [
-//           attachmentId,
-//           firId,
-//           attachment.fileName || null,
-//           attachment.filePath || null,
-//         ];
-
-//         db.query(query, values, (err) => {
-//           if (err) return reject(err);
-//           resolve();
-//         });
-//       });
-//     });
-
-//     // Combine all promises
-//     Promise.all([...victimPromises, proceedingsPromise, ...attachmentPromises])
-//       .then(() => {
-//         db.commit((err) => {
-//           if (err) return db.rollback(() => res.status(500).json({ message: 'Commit error', error: err }));
-//           res.status(200).json({ message: 'Step 5 data saved successfully, including attachments.' });
-//         });
-//       })
-//       .catch((err) => {
-//         db.rollback(() => res.status(500).json({ message: 'Transaction failed', error: err }));
-//       });
-//   });
-// };
-
-
 exports.handleStepFive = (req, res) => {
   const {
     firId,
-    victimsRelief,
+    victimsRelief = [],
     totalCompensation,
     proceedingsFileNo,
     proceedingsDate,
     proceedingsFile,
-    attachments,
+    attachments = [],
   } = req.body;
 
-  // console.log(req.body);
-  // console.log(firId);
   if (!firId) {
     return res.status(400).json({ message: 'FIR ID is missing.' });
   }
@@ -916,140 +782,39 @@ exports.handleStepFive = (req, res) => {
     }
     return result;
   };
-  const protocol = req.protocol; 
-  
-  const host = req.get('host');
-  
-  const domainName = `${protocol}://${host}`;
-  let imageUrls = [];
-  let judgementUrl = '';
-
-  if (Array.isArray(req.files)) {
-
-    req.files.forEach(file => {
-      if (file.fieldname === 'images') {
-        const imageUrl = `${domainName}/uploads/fir_data/${req.body.firId}/proceedings/images/${file.filename}`;
-        imageUrls.push(imageUrl);
-      } else if (file.fieldname === 'uploadJudgement') {
-        judgementUrl = `${domainName}/uploads/fir_data/${req.body.firId}/proceedings/judgement/${file.filename}`;
-      }
-    });
-
-  } else {
-
-    if (req.files['images']) {
-      req.files['images'].forEach(file => {
-        const imageUrl = `${domainName}/uploads/fir_data/${req.body.firId}/proceedings/images/${file.filename}`;
-        imageUrls.push(imageUrl);
-      });
-    }
-  
-    if (req.files['uploadJudgement']) {
-      const file = req.files['uploadJudgement'][0];
-      judgementUrl = `${domainName}/uploads/fir_data/${req.body.firId}/proceedings/judgement/${file.filename}`;
-    }
-  }
 
   db.beginTransaction((err) => {
     if (err) return res.status(500).json({ message: 'Transaction error', error: err });
-    let victimPromises = [];
-    if (Array.isArray(victimsRelief)) {
-      const victimPromises = victimsRelief.map((victim, index) => {
-        return new Promise((resolve, reject) => {
-          const victimId = victim.victimId || '';
-          const reliefId = victim.reliefId || generateRandomId(6);
-  
-          const query = `
-            INSERT INTO victim_relief (
-              victim_id, relief_id, fir_id, victim_name, community_certificate,
-              relief_amount_scst, relief_amount_exgratia, relief_amount_first_stage, additional_relief
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-              victim_name = VALUES(victim_name),
-              community_certificate = VALUES(community_certificate),
-              relief_amount_scst = VALUES(relief_amount_scst),
-              relief_amount_exgratia = VALUES(relief_amount_exgratia),
-              relief_amount_first_stage = VALUES(relief_amount_first_stage),
-              additional_relief = VALUES(additional_relief)
-          `;
-          const values = [
-            victimId, // Add victim_id here
-            reliefId,
-            firId,
-            victim.victimName || `Victim ${index + 1}`,
-            victim.communityCertificate || 'no',
-            victim.reliefAmountScst || '0.00',
-            victim.reliefAmountExGratia || '0.00',
-            victim.reliefAmountFirstStage || '0.00',
-            JSON.stringify(victim.additionalRelief || []),
-          ];
-  
-          db.query(query, values, (err) => {
-            if (err) return reject(err);
-            resolve();
-          });
-        });
-      });
-    }else {
-      console.error("victimsRelief is not an array", victimsRelief);
-    }
-    
-    const deletequery = `Delete from proceedings_victim_relief where fir_id=?`;
-    const deletequeryvalues = [ 
-      firId,
-    ];
-    db.query(deletequery, deletequeryvalues, (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Failed to delete FIR data', error: err });
-      }
-    });
 
-    // Insert or update proceedings data
-    const proceedingsPromise = new Promise((resolve, reject) => {
-      const proceedingsId = generateRandomId(6);
-      const query = `
-        INSERT INTO proceedings_victim_relief (
-          proceedingsId, fir_id, total_compensation, proceedings_file_no,
-          proceedings_date, proceedings_file, all_files
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE
-          total_compensation = VALUES(total_compensation),
-          proceedings_file_no = VALUES(proceedings_file_no),
-          proceedings_date = VALUES(proceedings_date),
-          proceedings_file = VALUES(proceedings_file),
-          all_files = VALUES(all_files)
-      `;
-
-      const values = [
-        proceedingsId,
-        firId,
-        totalCompensation || '0.00',
-        proceedingsFileNo || null,
-        proceedingsDate || null,
-        judgementUrl || null,
-        JSON.stringify(imageUrls) || null,
-      ];
-
-
-      db.query(query, values, (err) => {
-        if (err) return reject(err);
-        resolve();
-      });
-    });
-    let attachmentPromises = [];
-    // Insert attachments into the `attachment_relief` table
-    const attachments = imageUrls;
-    attachmentPromises = attachments.map((attachment) => {
+    // Insert or update victimsRelief
+    const victimPromises = victimsRelief.map((victim, index) => {
       return new Promise((resolve, reject) => {
-        const attachmentId = generateRandomId(8);
+        const victimId = victim.victimId || ''; // Use existing victim_id or generate a new one
+        const reliefId = victim.reliefId || generateRandomId(6);
+
         const query = `
-          INSERT INTO attachment_relief (
-             fir_id, file_path
-          ) VALUES (?, ?)
+          INSERT INTO victim_relief (
+            victim_id, relief_id, fir_id, victim_name, community_certificate,
+            relief_amount_scst, relief_amount_exgratia, relief_amount_first_stage, additional_relief
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+            victim_name = VALUES(victim_name),
+            community_certificate = VALUES(community_certificate),
+            relief_amount_scst = VALUES(relief_amount_scst),
+            relief_amount_exgratia = VALUES(relief_amount_exgratia),
+            relief_amount_first_stage = VALUES(relief_amount_first_stage),
+            additional_relief = VALUES(additional_relief)
         `;
-        const values = [ 
-          firId, 
-          attachment || null,
+        const values = [
+          victimId, // Add victim_id here
+          reliefId,
+          firId,
+          victim.victimName || `Victim ${index + 1}`,
+          victim.communityCertificate || 'no',
+          victim.reliefAmountScst || '0.00',
+          victim.reliefAmountExGratia || '0.00',
+          victim.reliefAmountFirstStage || '0.00',
+          JSON.stringify(victim.additionalRelief || []),
         ];
 
         db.query(query, values, (err) => {
@@ -1059,8 +824,58 @@ exports.handleStepFive = (req, res) => {
       });
     });
 
-    // Combine all promises
-    Promise.all([...victimPromises, proceedingsPromise,attachmentPromises])
+    // Insert or update proceedings data
+    const proceedingsPromise = new Promise((resolve, reject) => {
+      const proceedingsId = generateRandomId(6);
+      const query = `
+        INSERT INTO proceedings_victim_relief (
+          proceedings_id, fir_id, total_compensation, proceedings_file_no,
+          proceedings_date, proceedings_file
+        ) VALUES (?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          total_compensation = VALUES(total_compensation),
+          proceedings_file_no = VALUES(proceedings_file_no),
+          proceedings_date = VALUES(proceedings_date),
+          proceedings_file = VALUES(proceedings_file)
+      `;
+      const values = [
+        proceedingsId,
+        firId,
+        totalCompensation || '0.00',
+        proceedingsFileNo || null,
+        proceedingsDate || null,
+        proceedingsFile || null,
+      ];
+
+      db.query(query, values, (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+
+    const attachmentPromises = attachments.map((attachment) => {
+      return new Promise((resolve, reject) => {
+        const attachmentId = generateRandomId(8);
+        const query = `
+          INSERT INTO attachment_relief (
+            attachment_id, fir_id, file_name, file_path
+          ) VALUES (?, ?, ?, ?)
+        `;
+        const values = [
+          attachmentId,
+          firId,
+          attachment.fileName || null,
+          attachment.filePath || null,
+        ];
+
+        db.query(query, values, (err) => {
+          if (err) return reject(err);
+          resolve();
+        });
+      });
+    });
+
+    Promise.all([...victimPromises, proceedingsPromise, ...attachmentPromises])
       .then(() => {
         db.commit((err) => {
           if (err) return db.rollback(() => res.status(500).json({ message: 'Commit error', error: err }));
@@ -1074,172 +889,186 @@ exports.handleStepFive = (req, res) => {
 };
 
 
-
-
-// exports.handleStepSix = (req, res) => {
+// exports.handleStepFive = (req, res) => {
 //   const {
 //     firId,
-//     chargesheetDetails,
 //     victimsRelief,
+//     totalCompensation,
+//     proceedingsFileNo,
+//     proceedingsDate,
+//     proceedingsFile,
 //     attachments,
 //   } = req.body;
 
+//   // console.log(req.body);
+//   // console.log(firId);
+//   if (!firId) {
+//     return res.status(400).json({ message: 'FIR ID is missing.' });
+//   }
 
-  // console.log(firId);
+//   const generateRandomId = (length = 6) => {
+//     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//     let result = '';
+//     for (let i = 0; i < length; i++) {
+//       result += characters.charAt(Math.floor(Math.random() * characters.length));
+//     }
+//     return result;
+//   };
+//   const protocol = req.protocol; 
+  
+//   const host = req.get('host');
+  
+//   const domainName = `${protocol}://${host}`;
+//   let imageUrls = [];
+//   let judgementUrl = '';
+
+//   // if (Array.isArray(req.files)) {
+
+//   //   req.files.forEach(file => {
+//   //     if (file.fieldname === 'images') {
+//   //       const imageUrl = `${domainName}/uploads/fir_data/${req.body.firId}/proceedings/images/${file.filename}`;
+//   //       imageUrls.push(imageUrl);
+//   //     } else if (file.fieldname === 'uploadJudgement') {
+//   //       judgementUrl = `${domainName}/uploads/fir_data/${req.body.firId}/proceedings/judgement/${file.filename}`;
+//   //     }
+//   //   });
+
+//   // } else {
+
+//   //   if (req.files['images']) {
+//   //     req.files['images'].forEach(file => {
+//   //       const imageUrl = `${domainName}/uploads/fir_data/${req.body.firId}/proceedings/images/${file.filename}`;
+//   //       imageUrls.push(imageUrl);
+//   //     });
+//   //   }
+  
+//   //   if (req.files['uploadJudgement']) {
+//   //     const file = req.files['uploadJudgement'][0];
+//   //     judgementUrl = `${domainName}/uploads/fir_data/${req.body.firId}/proceedings/judgement/${file.filename}`;
+//   //   }
+//   // }
+
+//   db.beginTransaction((err) => {
+//     if (err) return res.status(500).json({ message: 'Transaction error', error: err });
+//     let victimPromises = [];
+//     if (Array.isArray(victimsRelief)) {
+//       const victimPromises = victimsRelief.map((victim, index) => {
+//         return new Promise((resolve, reject) => {
+//           const victimId = victim.victimId || '';
+//           const reliefId = victim.reliefId || generateRandomId(6);
+  
+//           const query = `
+//             INSERT INTO victim_relief (
+//               victim_id, relief_id, fir_id, victim_name, community_certificate,
+//               relief_amount_scst, relief_amount_exgratia, relief_amount_first_stage, additional_relief
+//             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+//             ON DUPLICATE KEY UPDATE
+//               victim_name = VALUES(victim_name),
+//               community_certificate = VALUES(community_certificate),
+//               relief_amount_scst = VALUES(relief_amount_scst),
+//               relief_amount_exgratia = VALUES(relief_amount_exgratia),
+//               relief_amount_first_stage = VALUES(relief_amount_first_stage),
+//               additional_relief = VALUES(additional_relief)
+//           `;
+//           const values = [
+//             victimId, // Add victim_id here
+//             reliefId,
+//             firId,
+//             victim.victimName || `Victim ${index + 1}`,
+//             victim.communityCertificate || 'no',
+//             victim.reliefAmountScst || '0.00',
+//             victim.reliefAmountExGratia || '0.00',
+//             victim.reliefAmountFirstStage || '0.00',
+//             JSON.stringify(victim.additionalRelief || []),
+//           ];
+  
+//           db.query(query, values, (err) => {
+//             if (err) return reject(err);
+//             resolve();
+//           });
+//         });
+//       });
+//     }else {
+//       console.error("victimsRelief is not an array", victimsRelief);
+//     }
+    
+//     const deletequery = `Delete from proceedings_victim_relief where fir_id=?`;
+//     const deletequeryvalues = [ 
+//       firId,
+//     ];
+//     db.query(deletequery, deletequeryvalues, (err) => {
+//       if (err) {
+//         return res.status(500).json({ message: 'Failed to delete FIR data', error: err });
+//       }
+//     });
+
+//     // Insert or update proceedings data
+//     const proceedingsPromise = new Promise((resolve, reject) => {
+//       const proceedingsId = generateRandomId(6);
+//       const query = `
+//         INSERT INTO proceedings_victim_relief (
+//           proceedingsId, fir_id, total_compensation, proceedings_file_no,
+//           proceedings_date, proceedings_file, all_files
+//         ) VALUES (?, ?, ?, ?, ?, ?, ?)
+//         ON DUPLICATE KEY UPDATE
+//           total_compensation = VALUES(total_compensation),
+//           proceedings_file_no = VALUES(proceedings_file_no),
+//           proceedings_date = VALUES(proceedings_date),
+//           proceedings_file = VALUES(proceedings_file),
+//           all_files = VALUES(all_files)
+//       `;
+
+//       const values = [
+//         proceedingsId,
+//         firId,
+//         totalCompensation || '0.00',
+//         proceedingsFileNo || null,
+//         proceedingsDate || null,
+//         judgementUrl || null,
+//         JSON.stringify(imageUrls) || null,
+//       ];
 
 
-  // if (!firId) {
-  //   return res.status(400).json({ message: 'FIR ID is missing.' });
-  // }
+//       db.query(query, values, (err) => {
+//         if (err) return reject(err);
+//         resolve();
+//       });
+//     });
+//     let attachmentPromises = [];
+//     // Insert attachments into the `attachment_relief` table
+//     const attachments = imageUrls;
+//     attachmentPromises = attachments.map((attachment) => {
+//       return new Promise((resolve, reject) => {
+//         const attachmentId = generateRandomId(8);
+//         const query = `
+//           INSERT INTO attachment_relief (
+//              fir_id, file_path
+//           ) VALUES (?, ?)
+//         `;
+//         const values = [ 
+//           firId, 
+//           attachment || null,
+//         ];
 
-  // const generateRandomId = (length = 8) => {
-  //   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  //   let result = '';
-  //   for (let i = 0; i < length; i++) {
-  //     result += characters.charAt(Math.floor(Math.random() * characters.length));
-  //   }
-  //   return result;
-  // };
+//         db.query(query, values, (err) => {
+//           if (err) return reject(err);
+//           resolve();
+//         });
+//       });
+//     });
 
-  // db.beginTransaction((err) => {
-  //   if (err) return res.status(500).json({ message: 'Transaction error', error: err });
-
-  //   // Update FIR status in the `fir_add` table
-  //   const updateFirStatusPromise = new Promise((resolve, reject) => {
-  //     const query = `
-  //       UPDATE fir_add
-  //       SET status = 6
-  //       WHERE fir_id = ?
-  //     `;
-  //     db.query(query, [firId], (err) => {
-  //       if (err) return reject(err);
-  //       resolve();
-  //     });
-  //   });
-
-  //   // Insert or update chargesheet details
-  //   const chargesheetId = chargesheetDetails.chargesheetId || generateRandomId();
-  //   const chargesheetPromise = new Promise((resolve, reject) => {
-  //     const query = `
-  //       INSERT INTO chargesheet_details (
-  //         chargesheet_id, fir_id, charge_sheet_filed, court_district,
-  //         court_name, case_type, case_number, rcs_file_number,
-  //         rcs_filing_date, mf_copy_path, total_compensation_1,
-  //         proceedings_file_no, proceedings_date, upload_proceedings_path
-  //       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  //       ON DUPLICATE KEY UPDATE
-  //         charge_sheet_filed = VALUES(charge_sheet_filed),
-  //         court_district = VALUES(court_district),
-  //         court_name = VALUES(court_name),
-  //         case_type = VALUES(case_type),
-  //         case_number = VALUES(case_number),
-  //         rcs_file_number = VALUES(rcs_file_number),
-  //         rcs_filing_date = VALUES(rcs_filing_date),
-  //         mf_copy_path = VALUES(mf_copy_path),
-  //         total_compensation_1 = VALUES(total_compensation_1),
-  //         proceedings_file_no = VALUES(proceedings_file_no),
-  //         proceedings_date = VALUES(proceedings_date),
-  //         upload_proceedings_path = VALUES(upload_proceedings_path)
-  //     `;
-  //     const values = [
-  //       chargesheetId,
-  //       firId,
-  //       chargesheetDetails.chargeSheetFiled || null,
-  //       chargesheetDetails.courtDistrict || null,
-  //       chargesheetDetails.courtName || null,
-  //       chargesheetDetails.caseType || null,
-  //       chargesheetDetails.caseNumber || null,
-  //       chargesheetDetails.rcsFileNumber || null,
-  //       chargesheetDetails.rcsFilingDate || null,
-  //       chargesheetDetails.mfCopyPath || null,
-  //       chargesheetDetails.totalCompensation || null,
-  //       chargesheetDetails.proceedingsFileNo || null,
-  //       chargesheetDetails.proceedingsDate || null,
-  //       chargesheetDetails.uploadProceedingsPath || null,
-  //     ];
-
-  //     db.query(query, values, (err) => {
-  //       if (err) return reject(err);
-  //       resolve();
-  //     });
-  //   });
-
-  //   // Insert or update victimsRelief
-  //   const victimPromises = victimsRelief.map((victim, index) => {
-  //     return new Promise((resolve, reject) => {
-  //       const victimId = victim.victimId || generateRandomId();
-  //       console.log('Victim Data:', victim);
-  //       console.log('Relief Amounts:', {
-  //         scst: victim.reliefAmountScst,
-  //         exGratia: victim.reliefAmountExGratia,
-  //         secondStage: victim.reliefAmountSecondStage,
-  //       });
-
-  //       const query = `
-  //         INSERT INTO chargesheet_victims ( fir_id,
-  //           victim_id, chargesheet_id, victim_name,
-  //           relief_amount_scst_1, relief_amount_ex_gratia_1,
-  //           relief_amount_second_stage
-  //         ) VALUES (?, ?, ?, ?, ?, ?,?)
-  //         ON DUPLICATE KEY UPDATE
-  //           fir_id = VALUES(fir_id),
-  //           victim_name = VALUES(victim_name),
-  //           relief_amount_scst_1 = VALUES(relief_amount_scst_1),
-  //           relief_amount_ex_gratia_1 = VALUES(relief_amount_ex_gratia_1),
-  //           relief_amount_second_stage = VALUES(relief_amount_second_stage)
-  //       `;
-  //       const values = [
-  //         firId,
-  //         victimId,
-  //         chargesheetId,
-  //         victim.victimName || `Victim ${index + 1}`,
-  //         victim.reliefAmountScst || '0.00',
-  //         victim.reliefAmountExGratia || '0.00',
-  //         victim.reliefAmountSecondStage || '0.00',
-  //       ];
-
-  //       db.query(query, values, (err) => {
-  //         if (err) return reject(err);
-  //         resolve();
-  //       });
-  //     });
-  //   });
-
-  //   // Insert attachments
-  //   const attachmentPromises = attachments.map((attachment) => {
-  //     return new Promise((resolve, reject) => {
-  //       const attachmentId = generateRandomId();
-  //       const query = `
-  //         INSERT INTO chargesheet_attachments (fir_id,
-  //           attachment_id, chargesheet_id, file_path
-  //         ) VALUES (?, ?, ?,?)
-  //       `;
-  //       const values = [
-  //         firId,
-  //         attachmentId,
-  //         chargesheetId,
-  //         attachment.filePath || null,
-  //       ];
-
-  //       db.query(query, values, (err) => {
-  //         if (err) return reject(err);
-  //         resolve();
-  //       });
-  //     });
-  //   });
-
-  //   // Combine all promises
-  //   Promise.all([updateFirStatusPromise, chargesheetPromise, ...victimPromises, ...attachmentPromises])
-  //     .then(() => {
-  //       db.commit((err) => {
-  //         if (err) return db.rollback(() => res.status(500).json({ message: 'Commit error', error: err }));
-  //         res.status(200).json({ message: 'Step 6 data saved successfully, and FIR status updated to 6.' });
-  //       });
-  //     })
-  //     .catch((err) => {
-  //       db.rollback(() => res.status(500).json({ message: 'Transaction failed', error: err }));
-  //     });
-  // });
+//     // Combine all promises
+//     Promise.all([...victimPromises, proceedingsPromise,attachmentPromises])
+//       .then(() => {
+//         db.commit((err) => {
+//           if (err) return db.rollback(() => res.status(500).json({ message: 'Commit error', error: err }));
+//           res.status(200).json({ message: 'Step 5 data saved successfully, including attachments.' });
+//         });
+//       })
+//       .catch((err) => {
+//         db.rollback(() => res.status(500).json({ message: 'Transaction failed', error: err }));
+//       });
+//   });
 // };
 
 
@@ -1247,28 +1076,14 @@ exports.handleStepFive = (req, res) => {
 exports.handleStepSix = (req, res) => {
   const {
     firId,
-    chargeSheetFiled,
-    courtDistrict,
-    courtName,
-    caseType,
-    caseNumber,
-    rcsFileNumber,
-    rcsFilingDate,
-    mfCopyPath,
-    totalCompensation,
-    proceedingsFileNo,
-    proceedingsDate,
+    chargesheetDetails,
     victimsRelief,
     attachments,
-  } = req.body; 
+  } = req.body;
 
-  console.log(firId);
-  const protocol = req.protocol;
 
-  
-  const host = req.get('host');
+  console.log("eeeeeeeeeeeeeeeeeeeeeeeee",chargesheetDetails);
 
-  const domainName = `${protocol}://${host}`;
 
   if (!firId) {
     return res.status(400).json({ message: 'FIR ID is missing.' });
@@ -1283,42 +1098,14 @@ exports.handleStepSix = (req, res) => {
     return result;
   };
 
-
-  let imageUrls = [];
-  let judgementUrl = '';
-  if (Array.isArray(req.files)) {
-    // If req.files is an array (like when using .array()), loop through each file
-    req.files.forEach(file => {
-      if (file.fieldname === 'images') {
-        const imageUrl = `${domainName}/uploads/fir_data/${req.body.firId}/chargesheet/images/${file.filename}`;
-        imageUrls.push(imageUrl);
-      } else if (file.fieldname === 'uploadProceedings_1') {
-        judgementUrl = `${domainName}/uploads/fir_data/${req.body.firId}/chargesheet/proceedings/${file.filename}`;
-      }
-    });
-  } else {
-    // If req.files is an object (like when using .fields()), handle each field separately
-    if (req.files['images']) {
-      req.files['images'].forEach(file => {
-        const imageUrl = `${domainName}/uploads/fir_data/${req.body.firId}/chargesheet/images/${file.filename}`;
-        imageUrls.push(imageUrl);
-      });
-    }
-  
-    if (req.files['uploadProceedings_1']) {
-      const file = req.files['uploadProceedings_1'][0];  // Assuming only one judgement file
-      judgementUrl = `${domainName}/uploads/fir_data/${req.body.firId}/chargesheet/proceedings/${file.filename}`;
-    }
-  }
-  
   db.beginTransaction((err) => {
     if (err) return res.status(500).json({ message: 'Transaction error', error: err });
 
     // Update FIR status in the `fir_add` table
     const updateFirStatusPromise = new Promise((resolve, reject) => {
       const query = `
-        UPDATE fir_add 
-        SET status = 6 
+        UPDATE fir_add
+        SET status = 6
         WHERE fir_id = ?
       `;
       db.query(query, [firId], (err) => {
@@ -1327,56 +1114,53 @@ exports.handleStepSix = (req, res) => {
       });
     });
 
-    // console.log(firId);
-
-    const deletequery = `Delete from chargesheet_details where fir_id=?`;
-    const deletequeryvalues = [ 
-      firId,
-    ];
-    db.query(deletequery, deletequeryvalues, (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Failed to delete FIR data', error: err });
-      }
-      
-    });
-
     // Insert or update chargesheet details
-    const chargesheetId = generateRandomId();
+    const chargesheetId = chargesheetDetails.chargesheetId || generateRandomId();
     const chargesheetPromise = new Promise((resolve, reject) => {
       const query = `
         INSERT INTO chargesheet_details (
           chargesheet_id, fir_id, charge_sheet_filed, court_district,
-          court_name, case_type, case_number, rcs_file_number, 
-          rcs_filing_date, mf_copy_path, total_compensation_1, 
-          proceedings_file_no, proceedings_date, upload_proceedings_path,all_files
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`;
+          court_name, case_type, case_number, rcs_file_number,
+          rcs_filing_date, mf_copy_path, total_compensation_1,
+          proceedings_file_no, proceedings_date, upload_proceedings_path
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          charge_sheet_filed = VALUES(charge_sheet_filed),
+          court_district = VALUES(court_district),
+          court_name = VALUES(court_name),
+          case_type = VALUES(case_type),
+          case_number = VALUES(case_number),
+          rcs_file_number = VALUES(rcs_file_number),
+          rcs_filing_date = VALUES(rcs_filing_date),
+          mf_copy_path = VALUES(mf_copy_path),
+          total_compensation_1 = VALUES(total_compensation_1),
+          proceedings_file_no = VALUES(proceedings_file_no),
+          proceedings_date = VALUES(proceedings_date),
+          upload_proceedings_path = VALUES(upload_proceedings_path)
+      `;
       const values = [
         chargesheetId,
         firId,
-        chargeSheetFiled || null,
-        courtDistrict || null,
-        courtName || null,
-        caseType || null,
-        caseNumber || null,
-        rcsFileNumber || null,
-        rcsFilingDate || null,
-        mfCopyPath || null,
-        totalCompensation || null,
-        proceedingsFileNo || null,
-        proceedingsDate || null,
-        judgementUrl || null,
-        JSON.stringify(imageUrls) || null,
+        chargesheetDetails.chargeSheetFiled || null,
+        chargesheetDetails.courtDistrict || null,
+        chargesheetDetails.courtName || null,
+        chargesheetDetails.caseType || null,
+        chargesheetDetails.caseNumber || null,
+        chargesheetDetails.rcsFileNumber || null,
+        chargesheetDetails.rcsFilingDate || null,
+        chargesheetDetails.mfCopyPath || null,
+        chargesheetDetails.totalCompensation || null,
+        chargesheetDetails.proceedingsFileNo || null,
+        chargesheetDetails.proceedingsDate || null,
+        chargesheetDetails.uploadProceedingsPath || null,
       ];
-      console.log(values);
 
       db.query(query, values, (err) => {
         if (err) return reject(err);
         resolve();
       });
     });
-    let victimPromises = []; 
-    
-    if (Array.isArray(victimsRelief)) {
+
     // Insert or update victimsRelief
     const victimPromises = victimsRelief.map((victim, index) => {
       return new Promise((resolve, reject) => {
@@ -1417,23 +1201,21 @@ exports.handleStepSix = (req, res) => {
         });
       });
     });
-  }
-  const attachments = imageUrls;
-  let attachmentPromises = [];
-  if (Array.isArray(attachments)) {
-    console.log("sdjfbsjf hsdbfsd fhsbfhsd fhjsdfsd fhsd fh sdhfjs dhf sdhf ");
+
     // Insert attachments
     const attachmentPromises = attachments.map((attachment) => {
       return new Promise((resolve, reject) => {
         const attachmentId = generateRandomId();
         const query = `
-          INSERT INTO chargesheet_attachments (fir_id, chargesheet_id, file_path
-          ) VALUES (?, ?, ?)
+          INSERT INTO chargesheet_attachments (fir_id,
+            attachment_id, chargesheet_id, file_path
+          ) VALUES (?, ?, ?,?)
         `;
         const values = [
-          firId, 
+          firId,
+          attachmentId,
           chargesheetId,
-          attachment || null,
+          attachment.filePath || null,
         ];
 
         db.query(query, values, (err) => {
@@ -1442,11 +1224,7 @@ exports.handleStepSix = (req, res) => {
         });
       });
     });
-  } 
-  console.log('Victim Data:', updateFirStatusPromise);
-  console.log('Victim Data:', chargesheetPromise);
-  console.log('Victim Data:', victimPromises);
-  console.log('Victim Data:', attachmentPromises);
+
     // Combine all promises
     Promise.all([updateFirStatusPromise, chargesheetPromise, ...victimPromises, ...attachmentPromises])
       .then(() => {
@@ -1460,6 +1238,225 @@ exports.handleStepSix = (req, res) => {
       });
   });
 };
+
+
+
+// exports.handleStepSix = (req, res) => {
+//   const {
+//     firId,
+//     chargeSheetFiled,
+//     courtDistrict,
+//     courtName,
+//     caseType,
+//     caseNumber,
+//     rcsFileNumber,
+//     rcsFilingDate,
+//     mfCopyPath,
+//     totalCompensation,
+//     proceedingsFileNo,
+//     proceedingsDate,
+//     victimsRelief,
+//     attachments,
+//   } = req.body; 
+
+//   console.log(firId);
+//   const protocol = req.protocol;
+
+  
+//   const host = req.get('host');
+
+//   const domainName = `${protocol}://${host}`;
+
+//   if (!firId) {
+//     return res.status(400).json({ message: 'FIR ID is missing.' });
+//   }
+
+//   const generateRandomId = (length = 8) => {
+//     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//     let result = '';
+//     for (let i = 0; i < length; i++) {
+//       result += characters.charAt(Math.floor(Math.random() * characters.length));
+//     }
+//     return result;
+//   };
+
+
+//   let imageUrls = [];
+//   let judgementUrl = '';
+//   if (Array.isArray(req.files)) {
+//     // If req.files is an array (like when using .array()), loop through each file
+//     req.files.forEach(file => {
+//       if (file.fieldname === 'images') {
+//         const imageUrl = `${domainName}/uploads/fir_data/${req.body.firId}/chargesheet/images/${file.filename}`;
+//         imageUrls.push(imageUrl);
+//       } else if (file.fieldname === 'uploadProceedings_1') {
+//         judgementUrl = `${domainName}/uploads/fir_data/${req.body.firId}/chargesheet/proceedings/${file.filename}`;
+//       }
+//     });
+//   } else {
+//     // If req.files is an object (like when using .fields()), handle each field separately
+//     if (req.files['images']) {
+//       req.files['images'].forEach(file => {
+//         const imageUrl = `${domainName}/uploads/fir_data/${req.body.firId}/chargesheet/images/${file.filename}`;
+//         imageUrls.push(imageUrl);
+//       });
+//     }
+  
+//     if (req.files['uploadProceedings_1']) {
+//       const file = req.files['uploadProceedings_1'][0];  // Assuming only one judgement file
+//       judgementUrl = `${domainName}/uploads/fir_data/${req.body.firId}/chargesheet/proceedings/${file.filename}`;
+//     }
+//   }
+  
+//   db.beginTransaction((err) => {
+//     if (err) return res.status(500).json({ message: 'Transaction error', error: err });
+
+//     // Update FIR status in the `fir_add` table
+//     const updateFirStatusPromise = new Promise((resolve, reject) => {
+//       const query = `
+//         UPDATE fir_add 
+//         SET status = 6 
+//         WHERE fir_id = ?
+//       `;
+//       db.query(query, [firId], (err) => {
+//         if (err) return reject(err);
+//         resolve();
+//       });
+//     });
+
+//     // console.log(firId);
+
+//     const deletequery = `Delete from chargesheet_details where fir_id=?`;
+//     const deletequeryvalues = [ 
+//       firId,
+//     ];
+//     db.query(deletequery, deletequeryvalues, (err) => {
+//       if (err) {
+//         return res.status(500).json({ message: 'Failed to delete FIR data', error: err });
+//       }
+      
+//     });
+
+//     // Insert or update chargesheet details
+//     const chargesheetId = generateRandomId();
+//     const chargesheetPromise = new Promise((resolve, reject) => {
+//       const query = `
+//         INSERT INTO chargesheet_details (
+//           chargesheet_id, fir_id, charge_sheet_filed, court_district,
+//           court_name, case_type, case_number, rcs_file_number, 
+//           rcs_filing_date, mf_copy_path, total_compensation_1, 
+//           proceedings_file_no, proceedings_date, upload_proceedings_path,all_files
+//         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)`;
+//       const values = [
+//         chargesheetId,
+//         firId,
+//         chargeSheetFiled || null,
+//         courtDistrict || null,
+//         courtName || null,
+//         caseType || null,
+//         caseNumber || null,
+//         rcsFileNumber || null,
+//         rcsFilingDate || null,
+//         mfCopyPath || null,
+//         totalCompensation || null,
+//         proceedingsFileNo || null,
+//         proceedingsDate || null,
+//         judgementUrl || null,
+//         JSON.stringify(imageUrls) || null,
+//       ];
+//       console.log(values);
+
+//       db.query(query, values, (err) => {
+//         if (err) return reject(err);
+//         resolve();
+//       });
+//     });
+//     let victimPromises = []; 
+    
+//     if (Array.isArray(victimsRelief)) {
+//     // Insert or update victimsRelief
+//     const victimPromises = victimsRelief.map((victim, index) => {
+//       return new Promise((resolve, reject) => {
+//         const victimId = victim.victimId || generateRandomId();
+//         console.log('Victim Data:', victim);
+//         console.log('Relief Amounts:', {
+//           scst: victim.reliefAmountScst,
+//           exGratia: victim.reliefAmountExGratia,
+//           secondStage: victim.reliefAmountSecondStage,
+//         });
+
+//         const query = `
+//           INSERT INTO chargesheet_victims ( fir_id,
+//             victim_id, chargesheet_id, victim_name,
+//             relief_amount_scst_1, relief_amount_ex_gratia_1,
+//             relief_amount_second_stage
+//           ) VALUES (?, ?, ?, ?, ?, ?,?)
+//           ON DUPLICATE KEY UPDATE
+//             fir_id = VALUES(fir_id),
+//             victim_name = VALUES(victim_name),
+//             relief_amount_scst_1 = VALUES(relief_amount_scst_1),
+//             relief_amount_ex_gratia_1 = VALUES(relief_amount_ex_gratia_1),
+//             relief_amount_second_stage = VALUES(relief_amount_second_stage)
+//         `;
+//         const values = [
+//           firId,
+//           victimId,
+//           chargesheetId,
+//           victim.victimName || `Victim ${index + 1}`,
+//           victim.reliefAmountScst || '0.00',
+//           victim.reliefAmountExGratia || '0.00',
+//           victim.reliefAmountSecondStage || '0.00',
+//         ];
+
+//         db.query(query, values, (err) => {
+//           if (err) return reject(err);
+//           resolve();
+//         });
+//       });
+//     });
+//   }
+//   const attachments = imageUrls;
+//   let attachmentPromises = [];
+//   if (Array.isArray(attachments)) {
+//     console.log("sdjfbsjf hsdbfsd fhsbfhsd fhjsdfsd fhsd fh sdhfjs dhf sdhf ");
+//     // Insert attachments
+//     const attachmentPromises = attachments.map((attachment) => {
+//       return new Promise((resolve, reject) => {
+//         const attachmentId = generateRandomId();
+//         const query = `
+//           INSERT INTO chargesheet_attachments (fir_id, chargesheet_id, file_path
+//           ) VALUES (?, ?, ?)
+//         `;
+//         const values = [
+//           firId, 
+//           chargesheetId,
+//           attachment || null,
+//         ];
+
+//         db.query(query, values, (err) => {
+//           if (err) return reject(err);
+//           resolve();
+//         });
+//       });
+//     });
+//   } 
+//   console.log('Victim Data:', updateFirStatusPromise);
+//   console.log('Victim Data:', chargesheetPromise);
+//   console.log('Victim Data:', victimPromises);
+//   console.log('Victim Data:', attachmentPromises);
+//     // Combine all promises
+//     Promise.all([updateFirStatusPromise, chargesheetPromise, ...victimPromises, ...attachmentPromises])
+//       .then(() => {
+//         db.commit((err) => {
+//           if (err) return db.rollback(() => res.status(500).json({ message: 'Commit error', error: err }));
+//           res.status(200).json({ message: 'Step 6 data saved successfully, and FIR status updated to 6.' });
+//         });
+//       })
+//       .catch((err) => {
+//         db.rollback(() => res.status(500).json({ message: 'Transaction failed', error: err }));
+//       });
+//   });
+// };
 
 
 
@@ -1566,15 +1563,24 @@ exports.getAllCommunities = (req, res) => {
 
 
 exports.getCastesByCommunity = (req, res) => {
-  const { community } = req.query; // Extract community from query parameters
+  const { community } = req.query;
+  // console.log('Community parameter:', community); // Log the community value
+  
+  if (!community) {
+    return res.status(400).json({ message: 'Community parameter is missing' });
+  }
+
   const query = 'SELECT caste_name FROM caste_community WHERE community_name = ?';
   db.query(query, [community], (err, results) => {
     if (err) {
+      // console.error('Error executing query:', err); // Log detailed error
       return res.status(500).json({ message: 'Failed to fetch caste names', error: err });
     }
-    res.json(results.map(row => row.caste_name)); // Return only the caste names
+    // console.log('Query results:', results); // Log results for debugging
+    res.json(results.map(row => row.caste_name));
   });
 };
+
 
 
 exports.getAllAccusedCommunities = (req, res) => {
@@ -1763,19 +1769,7 @@ exports.getFirDetails = (req, res) => {
 
           const query4 = `
           SELECT  
-            cd.fir_id,
-            cd.charge_sheet_filed,
-            cd.court_district,
-            cd.court_name,
-            cd.case_type,
-            cd.case_number,
-            cd.rcs_file_number,
-            cd.rcs_filing_date,
-            cd.mf_copy_path,
-            cd.total_compensation_1,
-            cd.proceedings_file_no,
-            cd.proceedings_date,
-            cd.upload_proceedings_path
+            *
           FROM 
             chargesheet_details cd
           LEFT JOIN 
@@ -1945,122 +1939,122 @@ exports.editStepSevenAsDraft = (req, res) => {
 }
 
 
-exports.saveStepSevenAsDraft = (req, res) => {
+// exports.saveStepSevenAsDraft = (req, res) => {
 
-  const { firId, trialDetails, compensationDetails, attachments, victimsDetails } = req.body;
+//   const { firId, trialDetails, compensationDetails, attachments, victimsDetails } = req.body;
 
-  if (!firId || !trialDetails || !compensationDetails) {
-      return res.status(400).json({ message: "Missing required fields." });
-  }
+//   if (!firId || !trialDetails || !compensationDetails) {
+//       return res.status(400).json({ message: "Missing required fields." });
+//   }
 
-  const caseId = generateRandomId(8); // Example: Length = 8 characters
+//   const caseId = generateRandomId(8); // Example: Length = 8 characters
 
-  db.beginTransaction((err) => {
-      if (err) return res.status(500).json({ message: "Transaction error", error: err });
+//   db.beginTransaction((err) => {
+//       if (err) return res.status(500).json({ message: "Transaction error", error: err });
 
-      // Insert into `case_details` with the generated `case_id`
-      const caseDetailsQuery = `
-          INSERT INTO case_details (
-              fir_id, case_id, court_name, court_district, trial_case_number,
-              public_prosecutor, prosecutor_phone, first_hearing_date, judgement_awarded
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-      const caseDetailsValues = [
-          firId,
-          caseId,
-          trialDetails.courtName,
-          trialDetails.courtDistrict,
-          trialDetails.trialCaseNumber,
-          trialDetails.publicProsecutor,
-          trialDetails.prosecutorPhone,
-          trialDetails.firstHearingDate,
-          trialDetails.judgementAwarded
+//       // Insert into `case_details` with the generated `case_id`
+//       const caseDetailsQuery = `
+//           INSERT INTO case_details (
+//               fir_id, case_id, court_name, court_district, trial_case_number,
+//               public_prosecutor, prosecutor_phone, first_hearing_date, judgement_awarded
+//           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+//       `;
+//       const caseDetailsValues = [
+//           firId,
+//           caseId,
+//           trialDetails.courtName,
+//           trialDetails.courtDistrict,
+//           trialDetails.trialCaseNumber,
+//           trialDetails.publicProsecutor,
+//           trialDetails.prosecutorPhone,
+//           trialDetails.firstHearingDate,
+//           trialDetails.judgementAwarded
           
-      ];
+//       ];
 
-      db.query(caseDetailsQuery, caseDetailsValues, (err) => {
-          if (err) return db.rollback(() => res.status(500).json({ message: "Error saving case details.", error: err }));
+//       db.query(caseDetailsQuery, caseDetailsValues, (err) => {
+//           if (err) return db.rollback(() => res.status(500).json({ message: "Error saving case details.", error: err }));
 
-          // Insert or Update `fir_trial` Table
-          const firTrialQuery = `
-              INSERT INTO fir_trial (
-                  fir_id, case_id, total_amount_third_stage, proceedings_file_no,
-                  proceedings_date, Commissionerate_file
-              ) VALUES (?, ?, ?, ?, ?, ?)
-              ON DUPLICATE KEY UPDATE
-                  total_amount_third_stage = VALUES(total_amount_third_stage),
-                  proceedings_file_no = VALUES(proceedings_file_no),
-                  proceedings_date = VALUES(proceedings_date),
-                  Commissionerate_file = VALUES(Commissionerate_file)
-          `;
-          const firTrialValues = [
-              firId,
-              caseId,
-              compensationDetails.totalCompensation,
-              compensationDetails.proceedingsFileNo,
-              compensationDetails.proceedingsDate,
-              compensationDetails.uploadProceedings
-          ];
+//           // Insert or Update `fir_trial` Table
+//           const firTrialQuery = `
+//               INSERT INTO fir_trial (
+//                   fir_id, case_id, total_amount_third_stage, proceedings_file_no,
+//                   proceedings_date, Commissionerate_file
+//               ) VALUES (?, ?, ?, ?, ?, ?)
+//               ON DUPLICATE KEY UPDATE
+//                   total_amount_third_stage = VALUES(total_amount_third_stage),
+//                   proceedings_file_no = VALUES(proceedings_file_no),
+//                   proceedings_date = VALUES(proceedings_date),
+//                   Commissionerate_file = VALUES(Commissionerate_file)
+//           `;
+//           const firTrialValues = [
+//               firId,
+//               caseId,
+//               compensationDetails.totalCompensation,
+//               compensationDetails.proceedingsFileNo,
+//               compensationDetails.proceedingsDate,
+//               compensationDetails.uploadProceedings
+//           ];
 
-          db.query(firTrialQuery, firTrialValues, (err) => {
-              if (err) return db.rollback(() => res.status(500).json({ message: "Error saving fir_trial details.", error: err }));
+//           db.query(firTrialQuery, firTrialValues, (err) => {
+//               if (err) return db.rollback(() => res.status(500).json({ message: "Error saving fir_trial details.", error: err }));
 
-              // Insert into `trial_relief` Table (Victim Details)
-              const victimPromises = victimsDetails.map((victim) => {
-                  return new Promise((resolve, reject) => {
-                      const trialId = generateRandomId(8); // Generate a random `trial_id` for each victim
-                      const victimQuery = `
-                          INSERT INTO trial_relief (
-                              fir_id, case_id, trial_id, victim_id, victim_name,
-                              relief_amount_act, relief_amount_government, relief_amount_final_stage
-                          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                      `;
-                      const victimValues = [
-                          firId,
-                          caseId,
-                          trialId,
-                          victim.victimId,
-                          victim.victimName,
-                          victim.reliefAmountAct,
-                          victim.reliefAmountGovernment,
-                          victim.reliefAmountFinalStage
-                      ];
+//               // Insert into `trial_relief` Table (Victim Details)
+//               const victimPromises = victimsDetails.map((victim) => {
+//                   return new Promise((resolve, reject) => {
+//                       const trialId = generateRandomId(8); // Generate a random `trial_id` for each victim
+//                       const victimQuery = `
+//                           INSERT INTO trial_relief (
+//                               fir_id, case_id, trial_id, victim_id, victim_name,
+//                               relief_amount_act, relief_amount_government, relief_amount_final_stage
+//                           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+//                       `;
+//                       const victimValues = [
+//                           firId,
+//                           caseId,
+//                           trialId,
+//                           victim.victimId,
+//                           victim.victimName,
+//                           victim.reliefAmountAct,
+//                           victim.reliefAmountGovernment,
+//                           victim.reliefAmountFinalStage
+//                       ];
 
-                      db.query(victimQuery, victimValues, (err) => (err ? reject(err) : resolve()));
-                  });
-              });
+//                       db.query(victimQuery, victimValues, (err) => (err ? reject(err) : resolve()));
+//                   });
+//               });
 
-              // Update `fir_add` Table
-              const firAddQuery = `
-                  UPDATE fir_add
-                  SET nature_of_judgement = ?, judgement_copy = ?
-                  WHERE fir_id = ?
-              `;
-              const firAddValues = [
-                  trialDetails.judgementNature,
-                  compensationDetails.uploadProceedings,
-                  firId
-              ];
+//               // Update `fir_add` Table
+//               const firAddQuery = `
+//                   UPDATE fir_add
+//                   SET nature_of_judgement = ?, judgement_copy = ?
+//                   WHERE fir_id = ?
+//               `;
+//               const firAddValues = [
+//                   trialDetails.judgementNature,
+//                   compensationDetails.uploadProceedings,
+//                   firId
+//               ];
 
-              db.query(firAddQuery, firAddValues, (err) => {
-                  if (err) return db.rollback(() => res.status(500).json({ message: "Error updating fir_add.", error: err }));
+//               db.query(firAddQuery, firAddValues, (err) => {
+//                   if (err) return db.rollback(() => res.status(500).json({ message: "Error updating fir_add.", error: err }));
 
-                  // Execute Victim Promises
-                  Promise.all(victimPromises)
-                      .then(() => {
-                          db.commit((err) => {
-                              if (err) return db.rollback(() => res.status(500).json({ message: "Transaction commit failed.", error: err }));
-                              res.status(200).json({ message: "Draft data saved successfully.", caseId });
-                          });
-                      })
-                      .catch((err) => {
-                          db.rollback(() => res.status(500).json({ message: "Error saving victim details.", error: err }));
-                      });
-              });
-          });
-      });
-  });
-};
+//                   // Execute Victim Promises
+//                   Promise.all(victimPromises)
+//                       .then(() => {
+//                           db.commit((err) => {
+//                               if (err) return db.rollback(() => res.status(500).json({ message: "Transaction commit failed.", error: err }));
+//                               res.status(200).json({ message: "Draft data saved successfully.", caseId });
+//                           });
+//                       })
+//                       .catch((err) => {
+//                           db.rollback(() => res.status(500).json({ message: "Error saving victim details.", error: err }));
+//                       });
+//               });
+//           });
+//       });
+//   });
+// };
 
 // // Function to Generate Random IDs
 // function generateRandomId(length) {
@@ -2071,6 +2065,264 @@ exports.saveStepSevenAsDraft = (req, res) => {
 //   }
 //   return result;
 // }
+
+
+
+exports.saveStepSevenAsDraft = (req, res) => {
+  // Destructure the request body
+  const {
+    firId, trialDetails, compensationDetails, attachments, victimsDetails,
+    appealDetails, appealDetailsOne, caseAppealDetailsTwo, caseAttachments
+  } = req.body;
+
+  // Log the received data to see if everything is coming as expected
+  console.log("Received request body:", req.body);
+
+  // Check if mandatory fields are missing
+  if (!firId || !trialDetails || !compensationDetails) {
+    console.log("Missing required fields:", { firId, trialDetails, compensationDetails });
+    return res.status(400).json({ message: "Missing required fields." });
+  }
+
+  // Generate case ID
+  const caseId = generateRandomId(8);
+  console.log("Generated case ID:", caseId);
+
+  // Start a database transaction
+  db.beginTransaction((err) => {
+    if (err) {
+      console.error("Transaction error:", err);
+      return res.status(500).json({ message: "Transaction error", error: err });
+    }
+
+    console.log("Transaction started.");
+
+    // Insert into `case_details` table
+    const caseDetailsQuery = `
+      INSERT INTO case_details (
+          fir_id, case_id, court_name, court_district, trial_case_number,
+          public_prosecutor, prosecutor_phone, first_hearing_date, judgement_awarded
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    const caseDetailsValues = [
+      firId,
+      caseId,
+      trialDetails.courtName,
+      trialDetails.courtDistrict,
+      trialDetails.trialCaseNumber,
+      trialDetails.publicProsecutor,
+      trialDetails.prosecutorPhone,
+      trialDetails.firstHearingDate,
+      trialDetails.judgementAwarded
+    ];
+
+    console.log("Executing case details query:", caseDetailsQuery);
+    console.log("With values:", caseDetailsValues);
+
+    db.query(caseDetailsQuery, caseDetailsValues, (err) => {
+      if (err) {
+        console.error("Error saving case details:", err);
+        return db.rollback(() => res.status(500).json({ message: "Error saving case details.", error: err }));
+      }
+
+      console.log("Case details saved successfully.");
+
+      // Insert or Update `fir_trial` Table
+      const firTrialQuery = `
+        INSERT INTO fir_trial (
+          fir_id, case_id, total_amount_third_stage, proceedings_file_no,
+          proceedings_date, Commissionerate_file
+        ) VALUES (?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          total_amount_third_stage = VALUES(total_amount_third_stage),
+          proceedings_file_no = VALUES(proceedings_file_no),
+          proceedings_date = VALUES(proceedings_date),
+          Commissionerate_file = VALUES(Commissionerate_file)
+      `;
+      const firTrialValues = [
+        firId,
+        caseId,
+        compensationDetails.totalCompensation,
+        compensationDetails.proceedingsFileNo,
+        compensationDetails.proceedingsDate,
+        compensationDetails.uploadProceedings
+      ];
+
+      console.log("Executing fir_trial query:", firTrialQuery);
+      console.log("With values:", firTrialValues);
+
+      db.query(firTrialQuery, firTrialValues, (err) => {
+        if (err) {
+          console.error("Error saving fir_trial details:", err);
+          return db.rollback(() => res.status(500).json({ message: "Error saving fir_trial details.", error: err }));
+        }
+        console.log("fir_trial details saved successfully.");
+      });
+
+      // Insert into `appeal_details` table
+      if (appealDetails) {
+        const appealDetailsQuery = `
+          INSERT INTO appeal_details (
+              fir_id, case_id, legal_opinion_obtained, case_fit_for_appeal,
+              government_approval_for_appeal, filed_by, designated_court
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        const appealDetailsValues = [
+          firId, caseId, appealDetails.legalOpinionObtained, appealDetails.caseFitForAppeal,
+          appealDetails.governmentApprovalForAppeal, appealDetails.filedBy, appealDetails.designatedCourt
+        ];
+
+        console.log("Executing appeal details query:", appealDetailsQuery);
+        console.log("With values:", appealDetailsValues);
+
+        db.query(appealDetailsQuery, appealDetailsValues, (err) => {
+          if (err) {
+            console.error("Error saving appeal details:", err);
+            return db.rollback(() => res.status(500).json({ message: "Error saving appeal details.", error: err }));
+          }
+          console.log("Appeal details saved successfully.");
+        });
+      }
+
+      // Insert into `appeal_details_one` table
+      if (appealDetailsOne) {
+        const appealDetailsOneQuery = `
+          INSERT INTO appeal_details_one (
+              fir_id, case_id, legal_opinion_obtained, case_fit_for_appeal,
+              government_approval_for_appeal, filed_by, designated_court, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        `;
+        const appealDetailsOneValues = [
+          firId, caseId, appealDetailsOne.legalOpinionObtained, appealDetailsOne.caseFitForAppeal,
+          appealDetailsOne.governmentApprovalForAppeal, appealDetailsOne.filedBy, appealDetailsOne.designatedCourt
+        ];
+
+        console.log("Executing appeal details one query:", appealDetailsOneQuery);
+        console.log("With values:", appealDetailsOneValues);
+
+        db.query(appealDetailsOneQuery, appealDetailsOneValues, (err) => {
+          if (err) {
+            console.error("Error saving appeal details one:", err);
+            return db.rollback(() => res.status(500).json({ message: "Error saving appeal details one.", error: err }));
+          }
+          console.log("Appeal details one saved successfully.");
+        });
+      }
+
+      // Insert into `case_appeal_details_two`
+      if (caseAppealDetailsTwo) {
+        const caseAppealDetailsTwoQuery = `
+          INSERT INTO case_appeal_details_two (
+              fir_id, case_id, legal_opinion_obtained, case_fit_for_appeal,
+              government_approval_for_appeal, filed_by, designated_court, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        `;
+        const caseAppealDetailsTwoValues = [
+          firId, caseId, caseAppealDetailsTwo.legalOpinionObtained, caseAppealDetailsTwo.caseFitForAppeal,
+          caseAppealDetailsTwo.governmentApprovalForAppeal, caseAppealDetailsTwo.filedBy, caseAppealDetailsTwo.designatedCourt
+        ];
+
+        console.log("Executing case appeal details two query:", caseAppealDetailsTwoQuery);
+        console.log("With values:", caseAppealDetailsTwoValues);
+
+        db.query(caseAppealDetailsTwoQuery, caseAppealDetailsTwoValues, (err) => {
+          if (err) {
+            console.error("Error saving case appeal details two:", err);
+            return db.rollback(() => res.status(500).json({ message: "Error saving case appeal details two.", error: err }));
+          }
+          console.log("Case appeal details two saved successfully.");
+        });
+      }
+
+      // Insert into `case_attachments` table
+      const caseAttachmentsQuery = `
+        INSERT INTO case_attachments (fir_id, case_id, file_name, uploaded_at, created_at, updated_at)
+        VALUES (?, ?, ?, NOW(), NOW(), NOW())
+      `;
+      attachments.forEach((attachment) => {
+        const caseAttachmentsValues = [firId, caseId, attachment.fileName];
+        console.log("Executing case attachment query:", caseAttachmentsQuery);
+        console.log("With values:", caseAttachmentsValues);
+
+        db.query(caseAttachmentsQuery, caseAttachmentsValues, (err) => {
+          if (err) {
+            console.error("Error saving case attachments:", err);
+            return db.rollback(() => res.status(500).json({ message: "Error saving case attachments.", error: err }));
+          }
+        });
+      });
+
+      // Insert into `case_court_details_two`
+      const caseCourtDetailsTwoQuery = `
+        INSERT INTO case_court_details_two (
+            fir_id, case_id, case_number, public_prosecutor, prosecutor_phone, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+      `;
+      const caseCourtDetailsTwoValues = [
+        firId, caseId, trialDetails.caseNumber, trialDetails.publicProsecutor,
+        trialDetails.prosecutorPhone
+      ];
+
+      console.log("Executing case court details two query:", caseCourtDetailsTwoQuery);
+      console.log("With values:", caseCourtDetailsTwoValues);
+
+      db.query(caseCourtDetailsTwoQuery, caseCourtDetailsTwoValues, (err) => {
+        if (err) {
+          console.error("Error saving case court details two:", err);
+          return db.rollback(() => res.status(500).json({ message: "Error saving case court details two.", error: err }));
+        }
+      });
+
+      // Insert into `trial_relief`
+      const victimPromises = victimsDetails.map((victim) => {
+        console.log('New Victim', victim.reliefAmountFinalStage);
+        return new Promise((resolve, reject) => {
+          const trialId = generateRandomId(8);
+          const victimQuery = `
+            INSERT INTO trial_relief (
+                fir_id, case_id, trial_id, victim_id, victim_name,
+                relief_amount_act, relief_amount_government, relief_amount_final_stage, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+          `;
+          const victimValues = [
+            firId,
+            caseId,
+            trialId,
+            victim.victimId,
+            victim.victimName,
+            victim.reliefAmountAct,
+            victim.reliefAmountGovernment,
+            victim.reliefAmountFinalStage
+          ];
+
+          console.log("Executing trial relief query:", victimQuery);
+          console.log("With values:", victimValues);
+
+          db.query(victimQuery, victimValues, (err) => (err ? reject(err) : resolve()));
+        });
+      });
+
+      // Commit transaction after all inserts
+      Promise.all(victimPromises)
+        .then(() => {
+          db.commit((err) => {
+            if (err) {
+              console.error("Transaction commit failed:", err);
+              return db.rollback(() => res.status(500).json({ message: "Transaction commit failed.", error: err }));
+            }
+            console.log("Transaction committed successfully.");
+            res.status(200).json({ message: "Draft data saved successfully.", caseId });
+          });
+        })
+        .catch((err) => {
+          db.rollback(() => res.status(500).json({ message: "Error saving victim details.", error: err }));
+        });
+    });
+  });
+};
+
+
+
 
 
 

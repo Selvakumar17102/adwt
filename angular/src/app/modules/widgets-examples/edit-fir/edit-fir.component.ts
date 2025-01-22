@@ -87,6 +87,7 @@ export class EditFirComponent implements OnInit, OnDestroy {
   step: number = 1;
   firForm: FormGroup;
   firId: string | null = null;
+  chargesheet_id: string | null = null;
 
 
   case_id: string | undefined = '';
@@ -973,8 +974,8 @@ export class EditFirComponent implements OnInit, OnDestroy {
             const formattedDate = dateObj.toISOString().split('T')[0]; // Format to 'yyyy-mm-dd'
             this.firForm.get('proceedingsDate')?.setValue(formattedDate);
           }
+
           const chargesheetDetails = response.data4;
-          console.log(chargesheetDetails);
           if (chargesheetDetails.charge_sheet_filed) {
             if(chargesheetDetails.charge_sheet_filed == "yes")
             {
@@ -985,7 +986,11 @@ export class EditFirComponent implements OnInit, OnDestroy {
             }
             
           }
-        // Set the court district, name, case type, and case number if they exist
+
+          if(chargesheetDetails.chargesheet_id){
+            this.chargesheet_id = chargesheetDetails.chargesheet_id;
+          }
+
         if (chargesheetDetails.court_district) {
           this.firForm.get('courtDivision')?.setValue(chargesheetDetails.court_district);
           this.onCourtDivisionChange1(chargesheetDetails.court_district);
@@ -2842,10 +2847,6 @@ export class EditFirComponent implements OnInit, OnDestroy {
       status: isSubmit ? 7 : undefined,
     };
 
-
-
-    console.log("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",formFields);
-
     
 
     // const formData = new FormData(); 
@@ -2926,37 +2927,45 @@ export class EditFirComponent implements OnInit, OnDestroy {
     });
     // Prepare data to be sent to the backend
     const chargesheetData = {
-      firId: this.firId, 
-        chargeSheetFiled: this.firForm.get('chargeSheetFiled')?.value || '',
-        courtDivision: this.firForm.get('courtDivision')?.value || '',
-        courtName: this.firForm.get('courtName')?.value || '',
-        caseType: this.firForm.get('caseType')?.value || '',
-        caseNumber: this.firForm.get('caseType')?.value === 'chargeSheet'
-          ? this.firForm.get('caseNumber')?.value || ''
-          : null,
-        rcsFileNumber: this.firForm.get('caseType')?.value === 'referredChargeSheet'
-          ? this.firForm.get('rcsFileNumber')?.value || ''
-          : null,
-        rcsFilingDate: this.firForm.get('caseType')?.value === 'referredChargeSheet'
-          ? this.firForm.get('rcsFilingDate')?.value || null
-          : null,
-        mfCopyPath: this.firForm.get('mfCopy')?.value || '',
-        totalCompensation: parseFloat(this.firForm.get('totalCompensation_1')?.value || '0.00').toFixed(2),
-        proceedingsFileNo: this.firForm.get('proceedingsFileNo_1')?.value || '',
-        proceedingsDate: this.firForm.get('proceedingsDate_1')?.value || null,
-        // uploadProceedingsPath: this.firForm.get('uploadProceedings_1')?.value || '',
-      victimsRelief: this.victimsRelief.value.map((relief: any, index: number) => ({
-        victimId: relief.victimId || null,
-        victimName: this.victimNames[index] || '',
-        reliefAmountScst: parseFloat(relief.reliefAmountScst_1 || '0.00').toFixed(2),
-        reliefAmountExGratia: parseFloat(relief.reliefAmountExGratia_1 || '0.00').toFixed(2),
-        reliefAmountSecondStage: parseFloat(relief.reliefAmountSecondStage || '0.00').toFixed(2),
-      })),
-      attachments: this.attachments_1.value.map((attachment: any) => ({
-        fileName: attachment.fileName_1 || null,
-        filePath: attachment.file_1 || null,
-      })),
-      status: 6, // Update status to 6 for the FIR
+        firId: this.firId, 
+
+        chargesheetDetails: {
+          chargesheet_id: this.chargesheet_id, 
+          chargeSheetFiled: this.firForm.get('chargeSheetFiled')?.value || '',
+          courtDivision: this.firForm.get('courtDivision')?.value || '',
+          courtName: this.firForm.get('courtName')?.value || '',
+          caseType: this.firForm.get('caseType')?.value || '',
+          caseNumber: this.firForm.get('caseType')?.value === 'chargeSheet'
+            ? this.firForm.get('caseNumber')?.value || ''
+            : null,
+          rcsFileNumber: this.firForm.get('caseType')?.value === 'referredChargeSheet'
+            ? this.firForm.get('rcsFileNumber')?.value || ''
+            : null,
+          rcsFilingDate: this.firForm.get('caseType')?.value === 'referredChargeSheet'
+            ? this.firForm.get('rcsFilingDate')?.value || null
+            : null,
+          mfCopyPath: this.firForm.get('mfCopy')?.value || '',
+          totalCompensation: parseFloat(this.firForm.get('totalCompensation_1')?.value || '0.00').toFixed(2),
+          proceedingsFileNo: this.firForm.get('proceedingsFileNo_1')?.value || '',
+          proceedingsDate: this.firForm.get('proceedingsDate_1')?.value || null,
+          // uploadProceedingsPath: this.firForm.get('uploadProceedings_1')?.value || '',
+        },
+
+        victimsRelief: this.victimsRelief.value.map((relief: any, index: number) => ({
+          victimId: relief.victimId || null,
+          victimName: this.victimNames[index] || '',
+          reliefAmountScst: parseFloat(relief.reliefAmountScst_1 || '0.00').toFixed(2),
+          reliefAmountExGratia: parseFloat(relief.reliefAmountExGratia_1 || '0.00').toFixed(2),
+          reliefAmountSecondStage: parseFloat(relief.reliefAmountSecondStage || '0.00').toFixed(2),
+        })),
+
+        attachments: this.attachments_1.value.map((attachment: any) => ({
+          fileName: attachment.fileName_1 || null,
+          filePath: attachment.file_1 || null,
+        })),
+        
+        status: 6, // Update status to 6 for the FIR
+      
     };
 
     // const formData = new FormData(); 
@@ -2977,6 +2986,8 @@ export class EditFirComponent implements OnInit, OnDestroy {
     // }
 
     // Call the service to send data to the backend
+
+    console.log("rrrrrrrrrrrrrrrr",chargesheetData);
 
     
     this.firService.saveStepSixAsDraft(chargesheetData).subscribe(
